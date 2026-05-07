@@ -1,5 +1,5 @@
 import React from 'react';
-import { Producer, TastingEvent } from '../constants';
+import { Producer, TastingEvent } from '../types';
 import { BadgeCheck, ArrowRight, Calendar, MapPin } from 'lucide-react';
 import { getCountryCode } from '../lib/countryUtils';
 

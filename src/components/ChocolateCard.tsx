@@ -1,5 +1,5 @@
 import React from 'react';
-import { Chocolate } from '../constants';
+import { Chocolate } from '../types';
 
 interface CardProps {
   chocolate: Chocolate;

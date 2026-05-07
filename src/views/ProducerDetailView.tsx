@@ -1,5 +1,5 @@
 import React from 'react';
-import { Producer, Chocolate } from '../constants';
+import { Producer, Chocolate } from '../types';
 import { ArrowLeft, MapPin, Users, Sparkles, BookOpen } from 'lucide-react';
 
 interface ProducerDetailProps {

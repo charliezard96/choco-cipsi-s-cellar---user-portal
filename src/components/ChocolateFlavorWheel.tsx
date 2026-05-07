@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Sector } from 'recharts';
 import { supabase } from '../lib/supabase';
-import { AromaProfile } from '../constants';
+import { AromaProfile } from '../types';
+import { aromaService } from '../services/aromaService';
+import { getIconHelper } from '../utils/iconUtils';
 import { RefreshCw, Radar, Info } from 'lucide-react';
 import * as Icons from 'lucide-react';
 
@@ -44,12 +46,7 @@ export const ChocolateFlavorWheel: React.FC<ChocolateFlavorWheelProps> = ({
   const fetchStats = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('community_aroma_stats')
-        .select('*')
-        .eq('chocolate_id', chocolateId);
-
-      if (error) throw error;
+      const data = await aromaService.fetchAromaStats(chocolateId);
       
       // Map view data to the format expected by the wheel
       const aggregated = (data || []).map(row => {
@@ -132,28 +129,13 @@ export const ChocolateFlavorWheel: React.FC<ChocolateFlavorWheelProps> = ({
     return { innerData: inner, midData: mid, outerData: outer, hasData: true };
   }, [stats, profiles]);
 
-  const getIcon = (slug: string | null, group?: string) => {
-    if (!slug && !group) return Icons.Search;
-    const formattedName = slug ? slug.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('') : '';
-    if (formattedName && (Icons as any)[formattedName]) return (Icons as any)[formattedName];
-    const lowerSlug = slug?.toLowerCase() || '';
-    const lowerGroup = group?.toLowerCase() || '';
-    if (lowerGroup.includes('frutt') || lowerSlug.includes('berry') || lowerSlug.includes('fruit')) return Icons.Apple;
-    if (lowerGroup.includes('flor') || lowerSlug.includes('flower') || lowerSlug.includes('rose')) return Icons.Flower2;
-    if (lowerGroup.includes(' tost') || lowerGroup.includes('spec') || lowerSlug.includes('spice')) return Icons.Flame;
-    if (lowerGroup.includes('latt') || lowerSlug.includes('milk') || lowerSlug.includes('crem')) return Icons.Milk;
-    if (lowerGroup.includes('erba') || lowerSlug.includes('grass') || lowerSlug.includes('leaf')) return Icons.Leaf;
-    if (lowerGroup.includes('tost') || lowerSlug.includes('nut') || lowerSlug.includes('mandorl')) return Icons.Nut;
-    if (lowerGroup.includes('dolc') || lowerSlug.includes('sugar') || lowerSlug.includes('honey')) return Icons.Candy;
-    if (lowerGroup.includes('bosc') || lowerGroup.includes('wood') || lowerSlug.includes('pin') || lowerSlug.includes('oak')) return Icons.Trees;
-    return Icons.Search;
-  };
+
 
   const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       const data = payload[0].payload;
       const profile = profiles.find(p => p.name === data.name) || {};
-      const IconComp = getIcon((profile as any).icon_slug || null, (profile as any).group_name || data.name);
+      const IconComp = getIconHelper((profile as any).icon_slug || null, (profile as any).group_name || data.name);
 
       return (
         <div className="bg-white p-3 rounded-xl shadow-xl border border-stone-100 animate-in fade-in zoom-in duration-200">

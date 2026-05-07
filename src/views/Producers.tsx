@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Producer } from '../constants';
+import { Producer } from '../types';
 import { ArrowRight, Search } from 'lucide-react';
 import { getCountryCode } from '../lib/countryUtils';
 

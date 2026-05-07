@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Chocolate } from '../constants';
+import { Chocolate } from '../types';
 import { ChocolateCard } from '../components/ChocolateCard';
 import { Search, Loader2 } from 'lucide-react';
 

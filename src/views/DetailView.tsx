@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Chocolate, AromaProfile } from '../constants';
+import { Chocolate, AromaProfile } from '../types';
+import { getIconHelper } from '../utils/iconUtils';
 import * as Icons from 'lucide-react';
 import { BookOpen, Verified, ArrowLeft, Star, LogIn, RefreshCw, Fingerprint } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
-import { supabase } from '../lib/supabase';
 import { AromaVoting } from '../components/AromaVoting';
 import { ChocolateSensoryProfile } from '../components/ChocolateSensoryProfile';
 import { ChocolateFlavorWheel } from '../components/ChocolateFlavorWheel';
+import { useChocolateDetail } from '../hooks/useChocolateDetail';
 
 interface DetailProps {
   chocolate: Chocolate;
@@ -15,127 +16,23 @@ interface DetailProps {
   producerLogoUrl?: string;
 }
 
-interface NoteVote {
-  aroma_id: string;
-  count: number;
-  user_voted: boolean;
-}
-
 export const DetailView: React.FC<DetailProps> = ({ chocolate, onBack, onSelectProducer, producerLogoUrl }) => {
   const { user, setShowAuthModal } = useAuth();
-  const [userRating, setUserRating] = useState<number | null>(null);
-  const [avgRating, setAvgRating] = useState<number | null>(null);
-  const [totalRatings, setTotalRatings] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [savingRating, setSavingRating] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ text: string, type: 'success' | 'error' } | null>(null);
-  const [aromaProfiles, setAromaProfiles] = useState<AromaProfile[]>([]);
-  const [officialNotes, setOfficialNotes] = useState<AromaProfile[]>([]);
-  const [noteVotes, setNoteVotes] = useState<NoteVote[]>([]);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  useEffect(() => {
-    fetchRatings();
-    fetchAromaProfiles();
-    fetchNoteVotes();
-    fetchOfficialNotes();
-    if (user) {
-      fetchUserRating();
-    }
-  }, [chocolate.id, user]);
-
-  const fetchOfficialNotes = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('BAR_AROMA_RELATION')
-        .select('aroma_id')
-        .eq('bar_id', chocolate.id);
-      
-      if (error) throw error;
-      
-      const aromaIds = data?.map(d => d.aroma_id) || [];
-      
-      // If we have profiles, filter them. If not, we'll wait for the useEffect hook
-      if (aromaProfiles.length > 0) {
-        const filtered = aromaProfiles.filter(p => aromaIds.includes(p.id));
-        setOfficialNotes(filtered);
-      } else {
-        // Just store the IDs for now if we want, but the useEffect on aromaProfiles will handle it
-      }
-    } catch (e) {
-      console.error('fetchOfficialNotes error:', e);
-    }
-  };
-
-  useEffect(() => {
-    if (aromaProfiles.length > 0) {
-      fetchOfficialNotes();
-    }
-  }, [aromaProfiles, chocolate.id]);
-
-  const fetchAromaProfiles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('aroma_profiles')
-        .select('*');
-      if (error) throw error;
-      setAromaProfiles(data || []);
-    } catch (e) {
-      console.error('fetchAromaProfiles error:', e);
-    }
-  };
-
-  const fetchNoteVotes = async () => {
-    try {
-      const { data: votes, error: votesError } = await supabase
-        .from('chocolate_aroma_votes')
-        .select('aroma_id, user_id')
-        .eq('chocolate_id', chocolate.id);
-      
-      if (votesError) throw votesError;
-
-      const aromaIds = Array.from(new Set(votes?.map(v => v.aroma_id) || []));
-      const aggregated: NoteVote[] = aromaIds.map(id => ({
-        aroma_id: id,
-        count: votes?.filter(v => v.aroma_id === id).length || 0,
-        user_voted: !!user && !!votes?.find(v => v.aroma_id === id && v.user_id === user.id)
-      }));
-
-      setNoteVotes(aggregated);
-    } catch (e) {
-      console.error('fetchNoteVotes error:', e);
-    }
-  };
-
-  const handleVoteNote = async (aromaId: string) => {
-    if (!user) return; // AromaVoting handles auth modal trigger
-
-    try {
-      const existingVote = noteVotes.find(nv => nv.aroma_id === aromaId && nv.user_voted);
-
-      if (existingVote) {
-        await supabase
-          .from('chocolate_aroma_votes')
-          .delete()
-          .eq('chocolate_id', chocolate.id)
-          .eq('aroma_id', aromaId)
-          .eq('user_id', user.id);
-      } else {
-        await supabase
-          .from('chocolate_aroma_votes')
-          .insert({
-            chocolate_id: chocolate.id,
-            aroma_id: aromaId,
-            user_id: user.id
-          });
-      }
-
-      await fetchNoteVotes();
-      setRefreshTrigger(prev => prev + 1);
-    } catch (e) {
-      console.error('handleVoteNote error:', e);
-    }
-  };
+  const {
+    aromaProfiles,
+    officialNotes,
+    noteVotes,
+    userRating,
+    avgRating,
+    totalRatings,
+    refreshTrigger,
+    handleRate,
+    handleToggleVote
+  } = useChocolateDetail(chocolate.id, user?.id);
 
   useEffect(() => {
     if (statusMsg) {
@@ -144,97 +41,25 @@ export const DetailView: React.FC<DetailProps> = ({ chocolate, onBack, onSelectP
     }
   }, [statusMsg]);
 
-  const fetchRatings = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('user_ratings')
-        .select('rating')
-        .eq('chocolate_id', chocolate.id);
-        
-      if (error) throw error;
-      
-      const ratings = data?.map(r => r.rating) || [];
-      if (ratings.length > 0) {
-        const avg = ratings.reduce((a, b) => a + b, 0) / ratings.length;
-        setAvgRating(avg);
-        setTotalRatings(ratings.length);
-      } else {
-        setAvgRating(null);
-        setTotalRatings(0);
-      }
-    } catch (e) {
-      console.error('fetchRatings error:', e);
-    }
-  };
-
-  const fetchUserRating = async () => {
-    if (!user) return;
-    try {
-      const { data, error } = await supabase
-        .from('user_ratings')
-        .select('rating')
-        .eq('chocolate_id', chocolate.id)
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (data) {
-        setUserRating(data.rating);
-      }
-    } catch (e) {
-      console.error('fetchUserRating error:', e);
-    }
-  };
-
-  const handleRate = async (rating: number) => {
+  const onRateInternal = async (rating: number) => {
     if (!user) {
       setShowAuthModal(true, 'login');
       return;
     }
-
     setSavingRating(true);
     setStatusMsg(null);
     try {
-      // 1. First check if a rating already exists to get its ID
-      const { data: existing, error: checkError } = await supabase
-        .from('user_ratings')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('chocolate_id', chocolate.id)
-        .maybeSingle();
-
-      if (checkError) throw checkError;
-
-      let result;
-      if (existing) {
-        // 2. Update existing rating using its primary key ID
-        result = await supabase
-          .from('user_ratings')
-          .update({ rating: rating })
-          .eq('id', existing.id);
-      } else {
-        // 3. Insert new rating
-        result = await supabase
-          .from('user_ratings')
-          .insert({
-            user_id: user.id,
-            chocolate_id: chocolate.id,
-            rating: rating
-          });
-      }
-
-      if (result.error) throw result.error;
-      
-      setUserRating(rating);
-      await fetchRatings();
+      await handleRate(rating);
       setStatusMsg({ text: 'Valutazione salvata!', type: 'success' });
     } catch (e: any) {
-      console.error('handleRate error:', e);
+      console.error('onRateInternal error:', e);
       setStatusMsg({ text: 'Errore nel salvataggio della valutazione.', type: 'error' });
     } finally {
       setSavingRating(false);
     }
   };
+
+
   return (
     <div id="detail-view" className="animate-in fade-in slide-in-from-bottom-4 duration-700">
       <button 
@@ -324,23 +149,6 @@ export const DetailView: React.FC<DetailProps> = ({ chocolate, onBack, onSelectP
             <div className="flex flex-wrap gap-4">
               {officialNotes.length > 0 ? (
                 officialNotes.map(profile => {
-                  const getIconHelper = (slug: string | null, group?: string) => {
-                    if (!slug && !group) return Icons.Search;
-                    const formattedName = slug ? slug.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('') : '';
-                    if (formattedName && (Icons as any)[formattedName]) return (Icons as any)[formattedName];
-                    const lowerSlug = slug?.toLowerCase() || '';
-                    const lowerGroup = group?.toLowerCase() || '';
-                    if (lowerGroup.includes('frutt') || lowerSlug.includes('berry') || lowerSlug.includes('fruit')) return Icons.Apple;
-                    if (lowerGroup.includes('flor') || lowerSlug.includes('flower') || lowerSlug.includes('rose')) return Icons.Flower2;
-                    if (lowerGroup.includes(' tost') || lowerGroup.includes('spec') || lowerSlug.includes('spice')) return Icons.Flame;
-                    if (lowerGroup.includes('latt') || lowerSlug.includes('milk') || lowerSlug.includes('crem')) return Icons.Milk;
-                    if (lowerGroup.includes('erba') || lowerSlug.includes('grass') || lowerSlug.includes('leaf')) return Icons.Leaf;
-                    if (lowerGroup.includes('tost') || lowerSlug.includes('nut') || lowerSlug.includes('mandorl')) return Icons.Nut;
-                    if (lowerGroup.includes('dolc') || lowerSlug.includes('sugar') || lowerSlug.includes('honey')) return Icons.Candy;
-                    if (lowerGroup.includes('bosc') || lowerGroup.includes('wood') || lowerSlug.includes('pin') || lowerSlug.includes('oak')) return Icons.Trees;
-                    return Icons.Search;
-                  };
-
                   const IconComponent = getIconHelper(profile.icon_slug, profile.group_name);
                   
                   return (
@@ -436,7 +244,7 @@ export const DetailView: React.FC<DetailProps> = ({ chocolate, onBack, onSelectP
                         disabled={savingRating}
                         onMouseEnter={() => setHoverRating(star)}
                         onMouseLeave={() => setHoverRating(0)}
-                        onClick={() => handleRate(star)}
+                        onClick={() => onRateInternal(star)}
                         className={`transition-transform active:scale-90 ${savingRating ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <Star 
@@ -493,7 +301,7 @@ export const DetailView: React.FC<DetailProps> = ({ chocolate, onBack, onSelectP
                     chocolateId={chocolate.id}
                     profiles={aromaProfiles}
                     votes={noteVotes}
-                    onVote={handleVoteNote}
+                    onVote={handleToggleVote}
                     userId={user?.id}
                  />
               </div>

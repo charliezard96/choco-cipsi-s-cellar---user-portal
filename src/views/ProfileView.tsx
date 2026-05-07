@@ -8,7 +8,10 @@ import {
   Fingerprint
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Chocolate, AromaProfile } from '../constants';
+import { Chocolate, AromaProfile } from '../types';
+import { getIconHelper } from '../utils/iconUtils';
+import { aromaService } from '../services/aromaService';
+import { ratingService } from '../services/ratingService';
 
 interface ProfileViewProps {
   chocolates: Chocolate[];
@@ -163,22 +166,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ chocolates, onSelectCh
     }
   };
 
-  const getAromaIcon = (slug: string | null, group?: string) => {
-    if (!slug && !group) return LucideIcons.Search;
-    const formattedName = slug ? slug.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('') : '';
-    if (formattedName && (LucideIcons as any)[formattedName]) return (LucideIcons as any)[formattedName];
-    const lowerSlug = slug?.toLowerCase() || '';
-    const lowerGroup = group?.toLowerCase() || '';
-    if (lowerGroup.includes('frutt') || lowerSlug.includes('berry') || lowerSlug.includes('fruit')) return LucideIcons.Apple;
-    if (lowerGroup.includes('flor') || lowerSlug.includes('flower') || lowerSlug.includes('rose')) return LucideIcons.Flower2;
-    if (lowerGroup.includes(' tost') || lowerGroup.includes('spec') || lowerSlug.includes('spice')) return LucideIcons.Flame;
-    if (lowerGroup.includes('latt') || lowerSlug.includes('milk') || lowerSlug.includes('crem')) return LucideIcons.Milk;
-    if (lowerGroup.includes('erba') || lowerSlug.includes('grass') || lowerSlug.includes('leaf')) return LucideIcons.Leaf;
-    if (lowerGroup.includes('tost') || lowerSlug.includes('nut') || lowerSlug.includes('mandorl')) return LucideIcons.Nut;
-    if (lowerGroup.includes('dolc') || lowerSlug.includes('sugar') || lowerSlug.includes('honey')) return LucideIcons.Candy;
-    if (lowerGroup.includes('bosc') || lowerGroup.includes('wood') || lowerSlug.includes('pin') || lowerSlug.includes('oak')) return LucideIcons.Trees;
-    return LucideIcons.Search;
-  };
+
 
   const aromaVotesByChocolate = userAromaVotes.reduce((acc, vote) => {
     if (!acc[vote.chocolate_id]) acc[vote.chocolate_id] = [];
@@ -552,7 +540,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ chocolates, onSelectCh
                            {votes.map(v => {
                               const profile = aromaProfiles.find(p => p.id === v.aroma_id);
                               if (!profile) return null;
-                              const Icon = getAromaIcon(profile.icon_slug, profile.group_name);
+                              const Icon = getIconHelper(profile.icon_slug, profile.group_name);
                               return (
                                  <div 
                                     key={v.id}

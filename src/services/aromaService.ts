@@ -1,0 +1,78 @@
+
+import { supabase } from '../lib/supabase';
+import { AromaProfile, NoteVote } from '../types';
+
+export const aromaService = {
+  async fetchProfiles(): Promise<AromaProfile[]> {
+    const { data, error } = await supabase.from('aroma_profiles').select('*');
+    if (error) throw error;
+    return data || [];
+  },
+
+  async fetchOfficialNotes(chocolateId: string): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('BAR_AROMA_RELATION')
+      .select('aroma_id')
+      .eq('bar_id', chocolateId);
+    if (error) throw error;
+    return data?.map(d => d.aroma_id) || [];
+  },
+
+  async fetchVotes(chocolateId: string, userId?: string): Promise<NoteVote[]> {
+    const { data: votes, error } = await supabase
+      .from('chocolate_aroma_votes')
+      .select('aroma_id, user_id')
+      .eq('chocolate_id', chocolateId);
+    
+    if (error) throw error;
+
+    const aromaIds = Array.from(new Set(votes?.map(v => v.aroma_id) || []));
+    return aromaIds.map(id => ({
+      aroma_id: id,
+      count: votes?.filter(v => v.aroma_id === id).length || 0,
+      user_voted: !!userId && !!votes?.find(v => v.aroma_id === id && v.user_id === userId)
+    }));
+  },
+
+  async toggleVote(chocolateId: string, aromaId: string, userId: string, hasVoted: boolean): Promise<void> {
+    if (hasVoted) {
+      const { error } = await supabase
+        .from('chocolate_aroma_votes')
+        .delete()
+        .eq('chocolate_id', chocolateId)
+        .eq('aroma_id', aromaId)
+        .eq('user_id', userId);
+      if (error) throw error;
+    } else {
+      const { error } = await supabase
+        .from('chocolate_aroma_votes')
+        .insert({
+          chocolate_id: chocolateId,
+          aroma_id: aromaId,
+          user_id: userId
+        });
+      if (error) throw error;
+    }
+  },
+
+  async fetchAromaStats(chocolateId: string) {
+    const { data, error } = await supabase
+      .from('community_aroma_stats')
+      .select('*')
+      .eq('chocolate_id', chocolateId);
+
+    if (error) throw error;
+    return data || [];
+  },
+
+  async fetchUserVotes(userId: string, chocolateId: string): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('chocolate_aroma_votes')
+      .select('aroma_id')
+      .eq('chocolate_id', chocolateId)
+      .eq('user_id', userId);
+    
+    if (error) throw error;
+    return data?.map(v => v.aroma_id) || [];
+  }
+};

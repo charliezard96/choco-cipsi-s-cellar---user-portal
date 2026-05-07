@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, User, Star, Trophy, Users, Loader2, ArrowRight, X, MapPin } from 'lucide-react';
 import { supabase } from '../lib/supabase';
-import { Chocolate } from '../constants';
+import { Chocolate } from '../types';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface CommunityProps {

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { TastingEvent } from '../constants';
+import { TastingEvent } from '../types';
 import { EventCard } from '../components/ProducerCard';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';

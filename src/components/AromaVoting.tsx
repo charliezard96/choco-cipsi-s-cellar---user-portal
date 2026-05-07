@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import * as Icons from 'lucide-react';
 import { Search, ChevronRight, ChevronLeft, Check, RefreshCw, X } from 'lucide-react';
-import { AromaProfile } from '../constants';
+import { AromaProfile } from '../types';
+import { getIconHelper } from '../utils/iconUtils';
 
 interface VoteData {
   aroma_id: string;
@@ -31,30 +32,7 @@ export const AromaVoting: React.FC<AromaVotingProps> = ({
   const [currentSubgroup, setCurrentSubgroup] = useState<string | null>(null);
   const [votingId, setVotingId] = useState<string | null>(null);
 
-  // Helper to get Lucide Icon with better mapping/fallbacks
-  const getIcon = (slug: string | null, group?: string) => {
-    if (!slug && !group) return Icons.Search;
-    
-    const formattedName = slug ? slug.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('') : '';
-    
-    // 1. Try Direct PascalCase
-    if (formattedName && (Icons as any)[formattedName]) return (Icons as any)[formattedName];
-    
-    // 2. Try common category fallbacks based on group/slug keywords
-    const lowerSlug = slug?.toLowerCase() || '';
-    const lowerGroup = group?.toLowerCase() || '';
-    
-    if (lowerGroup.includes('frutt') || lowerSlug.includes('berry') || lowerSlug.includes('fruit')) return Icons.Apple;
-    if (lowerGroup.includes('flor') || lowerSlug.includes('flower') || lowerSlug.includes('rose')) return Icons.Flower2;
-    if (lowerGroup.includes(' tost') || lowerGroup.includes('spec') || lowerSlug.includes('spice')) return Icons.Flame;
-    if (lowerGroup.includes('latt') || lowerSlug.includes('milk') || lowerSlug.includes('crem')) return Icons.Milk;
-    if (lowerGroup.includes('erba') || lowerSlug.includes('grass') || lowerSlug.includes('leaf')) return Icons.Leaf;
-    if (lowerGroup.includes('tost') || lowerSlug.includes('nut') || lowerSlug.includes('mandorl')) return Icons.Nut;
-    if (lowerGroup.includes('dolc') || lowerSlug.includes('sugar') || lowerSlug.includes('honey')) return Icons.Candy;
-    if (lowerGroup.includes('bosc') || lowerGroup.includes('wood') || lowerSlug.includes('pin') || lowerSlug.includes('oak')) return Icons.Trees;
-    
-    return Icons.Search;
-  };
+
 
   // Group Profiles
   const groups = useMemo(() => {
@@ -83,7 +61,7 @@ export const AromaVoting: React.FC<AromaVotingProps> = ({
 
   const renderNote = (p: AromaProfile) => {
     const vote = votes.find(v => v.aroma_id === p.id);
-    const IconComp = getIcon(p.icon_slug, p.group_name);
+    const IconComp = getIconHelper(p.icon_slug, p.group_name);
     const isVoted = vote?.user_voted;
     const isProcessing = votingId === p.id;
 
@@ -156,7 +134,7 @@ export const AromaVoting: React.FC<AromaVotingProps> = ({
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full flex items-center justify-center bg-stone-100">
-                      { React.createElement(getIcon(p.icon_slug, p.group_name), { size: 14, color: p.hex_color || undefined }) }
+                      { React.createElement(getIconHelper(p.icon_slug, p.group_name), { size: 14, color: p.hex_color || undefined }) }
                     </div>
                     <div>
                       <p className="text-xs font-black text-primary uppercase tracking-wider">{p.name}</p>
