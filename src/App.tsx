@@ -9,13 +9,14 @@ import { TastingsView } from './views/Tastings';
 import { ProfileView } from './views/ProfileView';
 import { CommunityView } from './views/Community';
 import { UpdatePasswordView } from './views/UpdatePassword';
+import { AuthCallback } from './views/AuthCallback';
 import { AuthModal } from './components/AuthModal';
 import { Chocolate, Producer } from './types';
 import { supabase } from './lib/supabase';
 import { useChocolates } from './hooks/useChocolates';
 import { useProducers } from './hooks/useProducers';
 
-type View = 'encyclopedia' | 'detail' | 'producers' | 'tastings' | 'producerDetail' | 'profile' | 'community' | 'update-password';
+type View = 'encyclopedia' | 'detail' | 'producers' | 'tastings' | 'producerDetail' | 'profile' | 'community' | 'update-password' | 'auth-callback';
 
 export default function App() {
   const [currentView, setCurrentView] = useState<View>('encyclopedia');
@@ -36,6 +37,8 @@ export default function App() {
     // Also check current URL for bypass (development/direct links)
     if (window.location.pathname === '/update-password') {
       setCurrentView('update-password');
+    } else if (window.location.pathname === '/auth-callback' || window.location.hash.includes('access_token')) {
+      setCurrentView('auth-callback');
     }
 
     return () => {
@@ -162,6 +165,10 @@ export default function App() {
 
         {currentView === 'update-password' && (
           <UpdatePasswordView onComplete={() => setCurrentView('encyclopedia')} />
+        )}
+
+        {currentView === 'auth-callback' && (
+          <AuthCallback />
         )}
       </main>
 

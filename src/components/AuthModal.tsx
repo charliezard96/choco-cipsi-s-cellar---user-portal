@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth, AuthMode } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { X, LogIn, UserPlus, Shield, Mail, Lock, User, RefreshCw, AlertCircle } from 'lucide-react';
+import { authService } from '../services/authService';
+import { useAuthSettings } from '../hooks/useAuthSettings';
+import { X, LogIn, UserPlus, Shield, Mail, Lock, User, RefreshCw, AlertCircle, Chrome } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export const AuthModal: React.FC = () => {
@@ -12,6 +14,7 @@ export const AuthModal: React.FC = () => {
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { googleEnabled, loading: settingsLoading } = useAuthSettings();
 
   useEffect(() => {
     if (showAuthModal) {
@@ -78,17 +81,17 @@ export const AuthModal: React.FC = () => {
   };
 
   const signInWithGoogle = async () => {
+    if (!googleEnabled) return;
+    
+    setLoading(true);
+    setError(null);
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-      if (error) throw error;
+      const redirectTo = `${window.location.origin}/auth-callback`;
+      await authService.initiateGoogleLogin(redirectTo);
     } catch (err: any) {
       console.error(err);
       setError(err.message || 'Accesso con Google fallito');
+      setLoading(false);
     }
   };
 
@@ -223,6 +226,39 @@ export const AuthModal: React.FC = () => {
                 {loading ? 'Elaborazione...' : (mode === 'login' ? 'Accedi' : mode === 'register' ? 'Crea un Account' : 'Invia Link Reset')}
               </button>
             </form>
+
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-stone-200"></div>
+              </div>
+              <div className="relative flex justify-center text-xs">
+                <span className="px-4 bg-surface text-stone-400 font-bold uppercase tracking-widest">o continua con</span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              {googleEnabled === false && !settingsLoading && (
+                <p className="text-[10px] text-stone-400 font-medium italic mb-2">
+                  L'accesso con Google è temporaneamente disabilitato dall'amministratore.
+                </p>
+              )}
+              
+              <button 
+                type="button"
+                onClick={signInWithGoogle}
+                disabled={loading || googleEnabled === false || settingsLoading}
+                className={`w-full flex items-center justify-center gap-3 border-2 py-3.5 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all active:scale-[0.98] disabled:opacity-30 disabled:cursor-not-allowed
+                  ${googleEnabled === false ? 'border-stone-200 text-stone-300' : 'border-stone-900 text-stone-900 hover:bg-stone-900 hover:text-white shadow-sm'}
+                `}
+              >
+                {settingsLoading ? (
+                  <RefreshCw className="animate-spin w-4 h-4" />
+                ) : (
+                  <Chrome size={18} />
+                )}
+                {settingsLoading ? 'Controllo impostazioni...' : 'Accedi con Google'}
+              </button>
+            </div>
 
             <p className="mt-8 text-xs text-on-surface-variant">
               {mode === 'login' ? "Non hai un account?" : mode === 'register' ? "Hai già un account?" : "Torna all'accesso?"}
