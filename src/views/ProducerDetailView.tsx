@@ -1,6 +1,6 @@
 import React from 'react';
 import { Producer, Chocolate } from '../types';
-import { ArrowLeft, MapPin, Users, Sparkles, BookOpen } from 'lucide-react';
+import { ArrowLeft, MapPin, Users, Sparkles, BookOpen, Globe } from 'lucide-react';
 
 interface ProducerDetailProps {
   producer: Producer;
@@ -37,7 +37,20 @@ export const ProducerDetailView: React.FC<ProducerDetailProps> = ({
                 <MapPin size={12} strokeWidth={3} />
                 {producer.location}
               </div>
-              <h1 className="text-7xl font-bold text-primary tracking-tighter leading-none">{producer.name}</h1>
+              <div className="flex flex-wrap items-center gap-6">
+                <h1 className="text-7xl font-bold text-primary tracking-tighter leading-none">{producer.name}</h1>
+                {producer.websiteUrl && (
+                  <a 
+                    href={producer.websiteUrl.startsWith('http') ? producer.websiteUrl : `https://${producer.websiteUrl}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-full hover:shadow-lg hover:shadow-primary/20 transition-all active:scale-95 group"
+                  >
+                    <Globe size={18} className="group-hover:rotate-12 transition-transform" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Visita il Sito</span>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
 

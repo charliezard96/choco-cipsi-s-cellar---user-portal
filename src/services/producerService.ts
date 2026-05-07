@@ -23,7 +23,8 @@ export const producerService = {
       philosophy: m.philosophy || '',
       specialFeature: m.special_feature || '',
       founders: m.founders || '',
-      logoUrl: (m.logo_url || m.logo || m.brand_logo || m.icon || '').trim()
+      logoUrl: (m.logo_url || m.logo || m.brand_logo || m.icon || '').trim(),
+      websiteUrl: m.website_url || ''
     }));
   }
 };

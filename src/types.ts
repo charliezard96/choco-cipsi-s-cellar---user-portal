@@ -37,6 +37,7 @@ export interface Producer {
   specialFeature?: string;
   founders?: string;
   logoUrl?: string;
+  websiteUrl?: string;
 }
 
 export interface TastingEvent {
