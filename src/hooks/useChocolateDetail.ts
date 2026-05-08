@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { AromaProfile, NoteVote } from '../types';
 import { aromaService } from '../services/aromaService';
@@ -17,11 +16,11 @@ export const useChocolateDetail = (chocolateId: string, userId?: string) => {
   const fetchData = useCallback(async () => {
     try {
       setLoading(true);
-      // Fetch common data
+
       const [profiles, votes, ratings] = await Promise.all([
         aromaService.fetchProfiles(),
         aromaService.fetchVotes(chocolateId, userId),
-        ratingService.fetchRatings(chocolateId)
+        ratingService.fetchRatings(chocolateId),
       ]);
 
       setAromaProfiles(profiles);
@@ -29,54 +28,43 @@ export const useChocolateDetail = (chocolateId: string, userId?: string) => {
       setAvgRating(ratings.avgRating);
       setTotalRatings(ratings.totalRatings);
 
-      // Fetch official notes IDs and filter
       const officialIds = await aromaService.fetchOfficialNotes(chocolateId);
       setOfficialNotes(profiles.filter(p => officialIds.includes(p.id)));
 
-      // Fetch user rating if logged in
       if (userId) {
-        const uRating = await ratingService.fetchUserRating(chocolateId, userId);
-        setUserRating(uRating);
+        setUserRating(await ratingService.fetchUserRating(chocolateId, userId));
       } else {
         setUserRating(null);
       }
     } catch (err) {
-      console.error('Error fetching chocolate detail data:', err);
+      console.error('[useChocolateDetail] Fetch error:', err);
     } finally {
       setLoading(false);
     }
   }, [chocolateId, userId]);
 
-  useEffect(() => {
-    fetchData();
-  }, [fetchData, refreshTrigger]);
+  useEffect(() => { fetchData(); }, [fetchData, refreshTrigger]);
 
-  const handleRate = async (rating: number) => {
+  const handleRate = useCallback(async (rating: number) => {
     if (!userId) return;
     await ratingService.saveRating(chocolateId, userId, rating);
     setUserRating(rating);
-    const ratings = await ratingService.fetchRatings(chocolateId);
-    setAvgRating(ratings.avgRating);
-    setTotalRatings(ratings.totalRatings);
-  };
+    const updated = await ratingService.fetchRatings(chocolateId);
+    setAvgRating(updated.avgRating);
+    setTotalRatings(updated.totalRatings);
+  }, [chocolateId, userId]);
 
-  const handleToggleVote = async (aromaId: string) => {
+  const handleToggleVote = useCallback(async (aromaId: string) => {
     if (!userId) return;
-    const existingVote = noteVotes.find(nv => nv.aroma_id === aromaId && nv.user_voted);
-    await aromaService.toggleVote(chocolateId, aromaId, userId, !!existingVote);
+    const existing = noteVotes.find(nv => nv.aroma_id === aromaId && nv.user_voted);
+    await aromaService.toggleVote(chocolateId, aromaId, userId, !!existing);
     setRefreshTrigger(prev => prev + 1);
-  };
+  }, [chocolateId, userId, noteVotes]);
 
   return {
-    aromaProfiles,
-    officialNotes,
-    noteVotes,
-    userRating,
-    avgRating,
-    totalRatings,
-    loading,
-    refreshTrigger,
-    handleRate,
-    handleToggleVote
+    aromaProfiles, officialNotes, noteVotes,
+    userRating, avgRating, totalRatings,
+    loading, refreshTrigger,
+    handleRate, handleToggleVote,
   };
 };

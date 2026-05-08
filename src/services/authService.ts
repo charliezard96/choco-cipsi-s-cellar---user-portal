@@ -7,9 +7,9 @@ export const authService = {
       .select('value')
       .eq('key', key)
       .maybeSingle();
-      
+
     if (error) {
-      console.error(`Error fetching app setting ${key}:`, error);
+      console.error(`[authService] Errore fetch setting "${key}":`, error);
       return null;
     }
     return data?.value as boolean | null;
@@ -25,14 +25,10 @@ export const authService = {
       provider: 'google',
       options: {
         redirectTo,
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        },
-      }
+        queryParams: { access_type: 'offline', prompt: 'consent' },
+      },
     });
-
     if (error) throw error;
     return data;
-  }
+  },
 };

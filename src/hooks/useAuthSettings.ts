@@ -6,19 +6,11 @@ export function useAuthSettings() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function checkSettings() {
-      try {
-        const enabled = await authService.isGoogleLoginEnabled();
-        setGoogleEnabled(enabled);
-      } catch (err) {
-        console.error('Failed to check auth settings:', err);
-        setGoogleEnabled(false);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    checkSettings();
+    authService
+      .isGoogleLoginEnabled()
+      .then(setGoogleEnabled)
+      .catch(() => setGoogleEnabled(false))
+      .finally(() => setLoading(false));
   }, []);
 
   return { googleEnabled, loading };

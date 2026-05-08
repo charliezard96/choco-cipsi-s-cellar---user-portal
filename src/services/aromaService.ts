@@ -1,4 +1,3 @@
-
 import { supabase } from '../lib/supabase';
 import { AromaProfile, NoteVote } from '../types';
 
@@ -23,18 +22,23 @@ export const aromaService = {
       .from('chocolate_aroma_votes')
       .select('aroma_id, user_id')
       .eq('chocolate_id', chocolateId);
-    
+
     if (error) throw error;
 
     const aromaIds = Array.from(new Set(votes?.map(v => v.aroma_id) || []));
     return aromaIds.map(id => ({
       aroma_id: id,
       count: votes?.filter(v => v.aroma_id === id).length || 0,
-      user_voted: !!userId && !!votes?.find(v => v.aroma_id === id && v.user_id === userId)
+      user_voted: !!userId && !!votes?.find(v => v.aroma_id === id && v.user_id === userId),
     }));
   },
 
-  async toggleVote(chocolateId: string, aromaId: string, userId: string, hasVoted: boolean): Promise<void> {
+  async toggleVote(
+    chocolateId: string,
+    aromaId: string,
+    userId: string,
+    hasVoted: boolean
+  ): Promise<void> {
     if (hasVoted) {
       const { error } = await supabase
         .from('chocolate_aroma_votes')
@@ -46,11 +50,7 @@ export const aromaService = {
     } else {
       const { error } = await supabase
         .from('chocolate_aroma_votes')
-        .insert({
-          chocolate_id: chocolateId,
-          aroma_id: aromaId,
-          user_id: userId
-        });
+        .insert({ chocolate_id: chocolateId, aroma_id: aromaId, user_id: userId });
       if (error) throw error;
     }
   },
@@ -60,7 +60,6 @@ export const aromaService = {
       .from('community_aroma_stats')
       .select('*')
       .eq('chocolate_id', chocolateId);
-
     if (error) throw error;
     return data || [];
   },
@@ -71,8 +70,35 @@ export const aromaService = {
       .select('aroma_id')
       .eq('chocolate_id', chocolateId)
       .eq('user_id', userId);
-    
     if (error) throw error;
     return data?.map(v => v.aroma_id) || [];
-  }
+  },
+
+  /**
+   * Fetch community stats (voti aggregati per cioccolato).
+   * Usato da ChocolateSensoryProfile — prima era una query diretta nel componente.
+   */
+  async fetchCommunityStats(chocolateId: string) {
+    const { data, error } = await supabase
+      .from('chocolate_aroma_votes')
+      .select('aroma_id, user_id')
+      .eq('chocolate_id', chocolateId);
+
+    if (error) throw error;
+
+    const totalVoters = new Set(data?.map(v => v.user_id) || []).size;
+    const counts: Record<string, number> = {};
+
+    (data || []).forEach(v => {
+      counts[v.aroma_id] = (counts[v.aroma_id] || 0) + 1;
+    });
+
+    return Object.entries(counts)
+      .map(([id, count]) => ({
+        aroma_id: id,
+        count,
+        percentage: totalVoters > 0 ? (count / totalVoters) * 100 : 0,
+      }))
+      .sort((a, b) => b.count - a.count);
+  },
 };

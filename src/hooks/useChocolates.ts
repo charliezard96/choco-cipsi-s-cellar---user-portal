@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Chocolate } from '../types';
 import { chocolateService } from '../services/chocolateService';
@@ -13,20 +12,18 @@ export const useChocolates = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await chocolateService.fetchAll();
-      setChocolates(data);
+      setChocolates(await chocolateService.fetchAll());
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch chocolates');
+      setError(err.message || 'Impossibile caricare i cioccolati');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchChocolates();
-  }, [fetchChocolates, retryCount]);
+  useEffect(() => { fetchChocolates(); }, [fetchChocolates, retryCount]);
 
-  const retry = () => setRetryCount(prev => prev + 1);
-
-  return { chocolates, loading, error, retry };
+  return {
+    chocolates, loading, error,
+    retry: () => setRetryCount(c => c + 1),
+  };
 };

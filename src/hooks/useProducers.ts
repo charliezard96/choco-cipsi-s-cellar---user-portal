@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { Producer } from '../types';
 import { producerService } from '../services/producerService';
@@ -8,22 +7,19 @@ export const useProducers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProducers = useCallback(async () => {
+  const fetch = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await producerService.fetchAll();
-      setProducers(data);
+      setProducers(await producerService.fetchAll());
     } catch (err: any) {
-      setError(err.message || 'Failed to fetch producers');
+      setError(err.message || 'Impossibile caricare i produttori');
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => {
-    fetchProducers();
-  }, [fetchProducers]);
+  useEffect(() => { fetch(); }, [fetch]);
 
-  return { producers, loading, error, refetch: fetchProducers };
+  return { producers, loading, error, refetch: fetch };
 };

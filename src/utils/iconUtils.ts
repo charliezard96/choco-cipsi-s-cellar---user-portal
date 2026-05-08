@@ -1,25 +1,56 @@
-import * as Icons from 'lucide-react';
+/**
+ * Icon resolver per i profili aromatici.
+ *
+ * NOTA: l'import wildcard `import * as Icons` impedisce il tree-shaking
+ * e carica tutte le ~1500 icone Lucide nel bundle.
+ *
+ * TODO: sostituire con un mapping esplicito delle icone effettivamente usate
+ * per ridurre il bundle di ~200-300KB. Esempio:
+ *
+ *   const ICON_MAP: Record<string, LucideIcon> = {
+ *     Apple, Flower2, Flame, Milk, Leaf, Nut, Candy, Trees, Search
+ *   };
+ */
+import { type LucideIcon } from 'lucide-react';
+import {
+  Search, Apple, Flower2, Flame, Milk, Leaf, Nut, Candy, Trees
+} from 'lucide-react';
+import * as AllIcons from 'lucide-react';
 
-export const getIconHelper = (slug: string | null, group?: string) => {
-  if (!slug && !group) return Icons.Search;
-  
-  const formattedName = slug ? slug.split(/[-_]/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('') : '';
-  
-  // 1. Try Direct PascalCase
-  if (formattedName && (Icons as any)[formattedName]) return (Icons as any)[formattedName];
-  
-  // 2. Try common category fallbacks based on group/slug keywords
-  const lowerSlug = slug?.toLowerCase() || '';
-  const lowerGroup = group?.toLowerCase() || '';
-  
-  if (lowerGroup.includes('frutt') || lowerSlug.includes('berry') || lowerSlug.includes('fruit')) return Icons.Apple;
-  if (lowerGroup.includes('flor') || lowerSlug.includes('flower') || lowerSlug.includes('rose')) return Icons.Flower2;
-  if (lowerGroup.includes(' tost') || lowerGroup.includes('spec') || lowerSlug.includes('spice')) return Icons.Flame;
-  if (lowerGroup.includes('latt') || lowerSlug.includes('milk') || lowerSlug.includes('crem')) return Icons.Milk;
-  if (lowerGroup.includes('erba') || lowerSlug.includes('grass') || lowerSlug.includes('leaf')) return Icons.Leaf;
-  if (lowerGroup.includes('tost') || lowerSlug.includes('nut') || lowerSlug.includes('mandorl')) return Icons.Nut;
-  if (lowerGroup.includes('dolc') || lowerSlug.includes('sugar') || lowerSlug.includes('honey')) return Icons.Candy;
-  if (lowerGroup.includes('bosc') || lowerGroup.includes('wood') || lowerSlug.includes('pin') || lowerSlug.includes('oak')) return Icons.Trees;
-  
-  return Icons.Search;
+const GROUP_FALLBACKS: Array<[RegExp, LucideIcon]> = [
+  [/frutt|berry|fruit/i, Apple],
+  [/flor|flower|rose/i, Flower2],
+  [/spec|spice|tost/i, Flame],
+  [/latt|milk|crem/i, Milk],
+  [/erba|grass|leaf/i, Leaf],
+  [/nocc|nut|mandorl/i, Nut],
+  [/dolc|sugar|honey/i, Candy],
+  [/bosc|wood|pin|oak/i, Trees],
+];
+
+/**
+ * Risolve un'icona Lucide dato uno slug e/o un nome di gruppo.
+ * Fallback: Search icon.
+ */
+export const getIconHelper = (slug: string | null, group?: string): LucideIcon => {
+  if (!slug && !group) return Search;
+
+  // 1. Prova il nome PascalCase diretto dallo slug
+  if (slug) {
+    const pascal = slug
+      .split(/[-_]/)
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join('');
+
+    const DirectIcon = (AllIcons as Record<string, unknown>)[pascal];
+    if (typeof DirectIcon === 'function') return DirectIcon as LucideIcon;
+  }
+
+  // 2. Fallback per gruppo/slug tramite pattern matching
+  const combined = `${slug || ''} ${group || ''}`.toLowerCase();
+  for (const [pattern, icon] of GROUP_FALLBACKS) {
+    if (pattern.test(combined)) return icon;
+  }
+
+  return Search;
 };
