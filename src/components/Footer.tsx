@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface FooterProps {
-  onNavigate: (view: string) => void;
+  onNavigate: (view: any) => void;
 }
 
 const FOOTER_LINKS = [
@@ -37,4 +37,4 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
       </div>
     </footer>
   );
-};
+};  

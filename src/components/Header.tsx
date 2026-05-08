@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase';
 
 interface HeaderProps {
   currentView: string;
-  onNavigate: (view: string) => void;
+  onNavigate: (view: any) => void;
 }
 
 const NAV_ITEMS = [
