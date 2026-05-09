@@ -1,15 +1,16 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Chocolate } from '../types';
 import { ChocolateCard } from '../components/ChocolateCard';
 import { Search, Loader2 } from 'lucide-react';
 
 interface Props {
-  onSelect: (id: string) => void;
   chocolates: Chocolate[];
   loading: boolean;
 }
 
-export const EncyclopediaView: React.FC<Props> = ({ onSelect, chocolates, loading }) => {
+export const EncyclopediaView: React.FC<Props> = ({ chocolates, loading }) => {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [selectedOrigin, setSelectedOrigin] = useState('All');
   const [selectedNote, setSelectedNote] = useState('All');
@@ -56,7 +57,6 @@ export const EncyclopediaView: React.FC<Props> = ({ onSelect, chocolates, loadin
                 <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40 w-5 h-5 pointer-events-none" />
               </div>
             </div>
-
             <div className="xl:col-span-8 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 w-full">
               {[
                 { label: 'Origine', value: selectedOrigin, setter: setSelectedOrigin, options: origins, all: 'Tutte le origini' },
@@ -91,7 +91,9 @@ export const EncyclopediaView: React.FC<Props> = ({ onSelect, chocolates, loadin
             </div>
           ))
         ) : (
-          filtered.map(choco => <ChocolateCard key={choco.id} chocolate={choco} onClick={onSelect} />)
+          filtered.map(choco => (
+            <ChocolateCard key={choco.id} chocolate={choco} onClick={(id) => navigate(`/chocolate/${id}`)} />
+          ))
         )}
       </section>
 

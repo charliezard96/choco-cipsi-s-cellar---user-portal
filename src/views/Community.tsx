@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Star, Trophy, Users, Loader2, ArrowRight, X, MapPin } from 'lucide-react';
 import { Chocolate, CommunityProfile, TopRatedChocolate } from '../types';
 import { profileService } from '../services/profileService';
@@ -7,16 +8,15 @@ import { motion, AnimatePresence } from 'motion/react';
 
 interface Props {
   chocolates: Chocolate[];
-  onSelectChocolate: (id: string) => void;
 }
 
-export const CommunityView: React.FC<Props> = ({ chocolates, onSelectChocolate }) => {
+export const CommunityView: React.FC<Props> = ({ chocolates }) => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<CommunityProfile[]>([]);
   const [searching, setSearching] = useState(false);
   const [topChocolates, setTopChocolates] = useState<TopRatedChocolate[]>([]);
   const [loadingTop, setLoadingTop] = useState(true);
-
   const [selectedUser, setSelectedUser] = useState<CommunityProfile | null>(null);
   const [selectedUserRatings, setSelectedUserRatings] = useState<any[]>([]);
   const [loadingRatings, setLoadingRatings] = useState(false);
@@ -54,30 +54,21 @@ export const CommunityView: React.FC<Props> = ({ chocolates, onSelectChocolate }
     e.preventDefault();
     if (!searchTerm.trim()) return;
     setSearching(true);
-    try {
-      setSearchResults(await profileService.search(searchTerm));
-    } catch (e) {
-      console.error('[Community] search error:', e);
-    } finally {
-      setSearching(false);
-    }
+    try { setSearchResults(await profileService.search(searchTerm)); }
+    catch (e) { console.error('[Community] search error:', e); }
+    finally { setSearching(false); }
   };
 
   const openProfile = async (user: CommunityProfile) => {
     setSelectedUser(user);
     setLoadingRatings(true);
-    try {
-      setSelectedUserRatings(await ratingService.fetchUserRatings(user.id));
-    } catch (e) {
-      console.error('[Community] fetchUserRatings error:', e);
-    } finally {
-      setLoadingRatings(false);
-    }
+    try { setSelectedUserRatings(await ratingService.fetchUserRatings(user.id)); }
+    catch (e) { console.error('[Community] fetchUserRatings error:', e); }
+    finally { setLoadingRatings(false); }
   };
 
   return (
     <div className="max-w-6xl mx-auto space-y-16 animate-in fade-in duration-700">
-      {/* Header */}
       <section className="text-center space-y-4">
         <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-secondary/10 border border-secondary/20 mb-4">
           <Users size={16} className="text-secondary" />
@@ -90,12 +81,9 @@ export const CommunityView: React.FC<Props> = ({ chocolates, onSelectChocolate }
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        {/* Search */}
         <div className="lg:col-span-7 space-y-8">
           <div className="bg-white p-8 rounded-3xl border border-primary/5 shadow-sm space-y-6">
-            <h2 className="text-xl font-bold text-primary flex items-center gap-3">
-              <Search className="text-secondary" size={24} /> Trova un Intenditore
-            </h2>
+            <h2 className="text-xl font-bold text-primary flex items-center gap-3"><Search className="text-secondary" size={24} /> Trova un Intenditore</h2>
             <form onSubmit={handleSearch} className="relative">
               <input type="text" placeholder="Cerca per username, nome o cognome..." value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
@@ -105,7 +93,6 @@ export const CommunityView: React.FC<Props> = ({ chocolates, onSelectChocolate }
                 {searching ? <Loader2 size={18} className="animate-spin" /> : 'Cerca'}
               </button>
             </form>
-
             <AnimatePresence mode="wait">
               {searchResults.length > 0 ? (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="grid grid-cols-1 gap-4 pt-4">
@@ -132,7 +119,6 @@ export const CommunityView: React.FC<Props> = ({ chocolates, onSelectChocolate }
           </div>
         </div>
 
-        {/* Top Rated */}
         <div className="lg:col-span-5">
           <div className="bg-primary text-white p-8 rounded-3xl shadow-xl space-y-8 relative overflow-hidden">
             <Trophy className="absolute -right-4 -top-4 text-white/5" size={160} />
@@ -149,7 +135,7 @@ export const CommunityView: React.FC<Props> = ({ chocolates, onSelectChocolate }
                   ))
                 ) : topChocolates.length > 0 ? (
                   topChocolates.map((choco, i) => (
-                    <button key={choco.id} onClick={() => onSelectChocolate(choco.id)} className="w-full flex items-center gap-4 group text-left">
+                    <button key={choco.id} onClick={() => navigate(`/chocolate/${choco.id}`)} className="w-full flex items-center gap-4 group text-left">
                       <div className="relative shrink-0">
                         <div className="absolute -left-2 -top-2 w-6 h-6 bg-secondary text-primary font-black text-[10px] flex items-center justify-center rounded-full z-10 shadow-lg">#{i + 1}</div>
                         <img src={choco.imageUrl} className="w-16 h-16 rounded-xl object-cover shadow-lg border border-white/10 group-hover:scale-105 transition-transform" alt="" />
@@ -178,15 +164,11 @@ export const CommunityView: React.FC<Props> = ({ chocolates, onSelectChocolate }
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelectedUser(null)} className="absolute inset-0 bg-black/50 backdrop-blur-md" />
             <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }}
               className="relative w-full max-w-2xl bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" onClick={e => e.stopPropagation()}>
-              {/* Profile Header */}
               <div className="bg-primary p-8 text-white relative">
-                <button onClick={() => setSelectedUser(null)} className="absolute right-6 top-6 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors" aria-label="Chiudi">
-                  <X size={20} />
-                </button>
+                <button onClick={() => setSelectedUser(null)} className="absolute right-6 top-6 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors" aria-label="Chiudi"><X size={20} /></button>
                 <div className="flex items-center gap-6">
                   <div className="w-24 h-24 rounded-2xl overflow-hidden bg-white/10 border-2 border-white/20 shrink-0">
-                    {selectedUser.avatar_url
-                      ? <img src={selectedUser.avatar_url} className="w-full h-full object-cover" alt="" />
+                    {selectedUser.avatar_url ? <img src={selectedUser.avatar_url} className="w-full h-full object-cover" alt="" />
                       : <div className="w-full h-full flex items-center justify-center text-3xl font-serif italic text-white/40">{selectedUser.username?.[0]?.toUpperCase()}</div>}
                   </div>
                   <div className="min-w-0">
@@ -199,7 +181,6 @@ export const CommunityView: React.FC<Props> = ({ chocolates, onSelectChocolate }
                   </div>
                 </div>
               </div>
-
               <div className="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
                 {selectedUser.about_me && (
                   <div>
@@ -217,7 +198,7 @@ export const CommunityView: React.FC<Props> = ({ chocolates, onSelectChocolate }
                         const choco = chocolates.find(c => c.id === String(rating.chocolate_id));
                         if (!choco) return null;
                         return (
-                          <button key={rating.id} onClick={() => { onSelectChocolate(choco.id); setSelectedUser(null); }}
+                          <button key={rating.id} onClick={() => { navigate(`/chocolate/${choco.id}`); setSelectedUser(null); }}
                             className="bg-stone-50 border border-stone-100 p-3 rounded-2xl flex items-center gap-4 hover:border-secondary/30 transition-all hover:bg-white hover:shadow-sm text-left group">
                             <img src={choco.imageUrl} className="w-12 h-12 rounded-lg object-cover" alt="" />
                             <div className="flex-1 min-w-0">

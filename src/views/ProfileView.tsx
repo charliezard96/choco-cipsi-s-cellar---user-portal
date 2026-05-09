@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth, UserProfile } from '../contexts/AuthContext';
 import { User, Save, MapPin, AlignLeft, RefreshCw, Star, X, ChevronLeft, ChevronRight, BookOpen, Camera, Loader2, Fingerprint } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
@@ -10,12 +11,12 @@ import { profileService } from '../services/profileService';
 
 interface Props {
   chocolates: Chocolate[];
-  onSelectChocolate: (id: string) => void;
 }
 
 const ITEMS_PER_PAGE = 10;
 
-export const ProfileView: React.FC<Props> = ({ chocolates, onSelectChocolate }) => {
+export const ProfileView: React.FC<Props> = ({ chocolates }) => {
+  const navigate = useNavigate();
   const { profile, user, loading, refreshProfile } = useAuth();
   const [formData, setFormData] = useState<Partial<UserProfile>>({});
   const [saving, setSaving] = useState(false);
@@ -34,11 +35,7 @@ export const ProfileView: React.FC<Props> = ({ chocolates, onSelectChocolate }) 
 
   useEffect(() => {
     if (!profile || !user) return;
-    setFormData({
-      username: profile.username || '', name: profile.name || '', surname: profile.surname || '',
-      aboutMe: profile.aboutMe || '', favouriteOrigin: profile.favouriteOrigin || '',
-    });
-    // Usa i service layer (prima erano query dirette)
+    setFormData({ username: profile.username || '', name: profile.name || '', surname: profile.surname || '', aboutMe: profile.aboutMe || '', favouriteOrigin: profile.favouriteOrigin || '' });
     ratingService.fetchUserRatings(user.id).then(setUserRatings).catch(console.error);
     profileService.fetchUserAromaVotes(user.id).then(setUserAromaVotes).catch(console.error);
     aromaService.fetchProfiles().then(setAromaProfiles).catch(console.error);
@@ -53,67 +50,46 @@ export const ProfileView: React.FC<Props> = ({ chocolates, onSelectChocolate }) 
       setStatusMsg({ text: 'Avatar aggiornato!', type: 'success' });
     } catch (err: any) {
       setStatusMsg({ text: `Upload fallito: ${err.message}`, type: 'error' });
-    } finally {
-      setUploading(false);
-    }
+    } finally { setUploading(false); }
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    setSaving(true);
-    setStatusMsg(null);
+    setSaving(true); setStatusMsg(null);
     try {
-      await profileService.update(user.id, {
-        username: formData.username, name: formData.name, surname: formData.surname,
-        about_me: formData.aboutMe, favourite_origin: formData.favouriteOrigin,
-      });
+      await profileService.update(user.id, { username: formData.username, name: formData.name, surname: formData.surname, about_me: formData.aboutMe, favourite_origin: formData.favouriteOrigin });
       await refreshProfile();
       setStatusMsg({ text: 'Profilo aggiornato!', type: 'success' });
-    } catch {
-      setStatusMsg({ text: 'Aggiornamento fallito.', type: 'error' });
-    } finally {
-      setSaving(false);
-    }
+    } catch { setStatusMsg({ text: 'Aggiornamento fallito.', type: 'error' }); }
+    finally { setSaving(false); }
   };
 
-  const aromaVotesByChocolate = userAromaVotes.reduce<Record<string, any[]>>((acc, v) => {
-    (acc[v.chocolate_id] ||= []).push(v);
-    return acc;
-  }, {});
-
-  const enrichedRatings = userRatings
-    .map(r => ({ ...r, chocolateDetails: chocolates.find(c => c.id === String(r.chocolate_id)) }))
-    .filter(r => r.chocolateDetails);
-
+  const aromaVotesByChocolate = userAromaVotes.reduce<Record<string, any[]>>((acc, v) => { (acc[v.chocolate_id] ||= []).push(v); return acc; }, {});
+  const enrichedRatings = userRatings.map(r => ({ ...r, chocolateDetails: chocolates.find(c => c.id === String(r.chocolate_id)) })).filter(r => r.chocolateDetails);
   const totalPages = Math.ceil(enrichedRatings.length / ITEMS_PER_PAGE);
   const paginatedRatings = enrichedRatings.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-  // Dati dinamici (prima erano hardcoded)
   const memberSince = profile?.createdAt
     ? new Date(profile.createdAt).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })
-    : user?.created_at
-      ? new Date(user.created_at).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' })
-      : '—';
+    : user?.created_at ? new Date(user.created_at).toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }) : '—';
 
   if (loading) return <div className="flex items-center justify-center min-h-[400px]"><RefreshCw className="animate-spin text-primary w-8 h-8" /></div>;
   if (!user) return (
     <div className="text-center py-20 bg-surface-container rounded-3xl border border-primary/10">
       <User size={48} className="mx-auto text-stone-300 mb-4" />
       <h2 className="text-xl font-bold text-primary mb-2">Accesso Archivio Privato</h2>
-      <p className="text-on-surface-variant max-w-md mx-auto">I profili personali sono riservati ai membri. Accedi per gestire la tua collezione.</p>
+      <p className="text-on-surface-variant max-w-md mx-auto">I profili personali sono riservati ai membri.</p>
     </div>
   );
 
   return (
     <div className="animate-in fade-in duration-700 max-w-4xl mx-auto">
-      {/* Header */}
       <header className="mb-12 flex flex-col md:flex-row gap-8 items-center md:items-start text-center md:text-left">
         <div className="relative group">
           <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleUploadAvatar} />
           <button disabled={uploading} onClick={() => fileInputRef.current?.click()} className="relative cursor-pointer rounded-3xl overflow-hidden">
-            {profile?.photoURL
-              ? <img src={profile.photoURL} className="w-32 h-32 rounded-3xl shadow-xl border-4 border-white object-cover" alt="Avatar" />
+            {profile?.photoURL ? <img src={profile.photoURL} className="w-32 h-32 rounded-3xl shadow-xl border-4 border-white object-cover" alt="Avatar" />
               : <div className="w-32 h-32 rounded-3xl bg-primary/10 flex items-center justify-center text-primary shadow-inner border-4 border-white"><User size={48} strokeWidth={1.5} /></div>}
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               {uploading ? <Loader2 className="text-white animate-spin" size={24} /> : <Camera className="text-white" size={24} />}
@@ -121,19 +97,15 @@ export const ProfileView: React.FC<Props> = ({ chocolates, onSelectChocolate }) 
           </button>
         </div>
         <div className="flex-1 py-2">
-          <h1 className="text-4xl font-serif italic text-primary mb-2">
-            {formData.name || formData.surname ? `${formData.name} ${formData.surname}`.trim() : 'Intenditore senza nome'}
-          </h1>
+          <h1 className="text-4xl font-serif italic text-primary mb-2">{formData.name || formData.surname ? `${formData.name} ${formData.surname}`.trim() : 'Intenditore senza nome'}</h1>
           {formData.username && <p className="text-secondary font-mono text-sm mb-2">@{formData.username}</p>}
           <p className="text-on-surface-variant font-medium uppercase tracking-[0.2em] text-xs">Gestore della Collezione</p>
           <div className="flex flex-wrap gap-4 mt-6 justify-center md:justify-start">
             <button onClick={() => setIsModalOpen(true)} className="bg-surface-container px-4 py-2 rounded-full border border-primary/5 flex items-center gap-2 hover:bg-stone-200 transition-colors shadow-sm active:scale-95 group">
-              <Star className="text-secondary w-4 h-4 fill-secondary group-hover:scale-110 transition-transform" />
-              <span className="text-xs font-bold text-primary">{userRatings.length} Valutazioni</span>
+              <Star className="text-secondary w-4 h-4 fill-secondary group-hover:scale-110 transition-transform" /><span className="text-xs font-bold text-primary">{userRatings.length} Valutazioni</span>
             </button>
             <div className="bg-surface-container px-4 py-2 rounded-full border border-primary/5 flex items-center gap-2">
-              <MapPin className="text-stone-400 w-4 h-4" />
-              <span className="text-xs font-bold text-stone-600">{formData.favouriteOrigin || 'Nessuna origine definita'}</span>
+              <MapPin className="text-stone-400 w-4 h-4" /><span className="text-xs font-bold text-stone-600">{formData.favouriteOrigin || 'Nessuna origine definita'}</span>
             </div>
           </div>
         </div>
@@ -155,15 +127,12 @@ export const ProfileView: React.FC<Props> = ({ chocolates, onSelectChocolate }) 
               </div>
               <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
                 {enrichedRatings.length === 0 ? (
-                  <div className="py-20 text-center">
-                    <BookOpen className="text-stone-300 mx-auto mb-4" size={32} />
-                    <p className="text-stone-500 font-medium italic">Nessuna voce nel tuo archivio personale.</p>
-                  </div>
+                  <div className="py-20 text-center"><BookOpen className="text-stone-300 mx-auto mb-4" size={32} /><p className="text-stone-500 font-medium italic">Nessuna voce nel tuo archivio.</p></div>
                 ) : (
                   <div className="space-y-3">
                     {paginatedRatings.map(r => (
                       <motion.button key={r.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                        onClick={() => { setIsModalOpen(false); onSelectChocolate(r.chocolateDetails.id); }}
+                        onClick={() => { setIsModalOpen(false); navigate(`/chocolate/${r.chocolateDetails.id}`); }}
                         className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-surface-container border border-transparent hover:border-primary/5 transition-all text-left">
                         <img src={r.chocolateDetails.imageUrl} className="w-16 h-16 rounded-xl object-cover shadow-sm bg-stone-100" alt={r.chocolateDetails.name} />
                         <div className="flex-1 min-w-0">
@@ -193,7 +162,6 @@ export const ProfileView: React.FC<Props> = ({ chocolates, onSelectChocolate }) 
       </AnimatePresence>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-        {/* Form */}
         <div className="lg:col-span-2">
           <section className="bg-white p-8 rounded-3xl border border-primary/10 shadow-sm">
             <h2 className="text-xl font-bold text-primary mb-8 flex items-center gap-3"><User size={20} className="text-secondary" /> Impostazioni Profilo</h2>
@@ -244,47 +212,32 @@ export const ProfileView: React.FC<Props> = ({ chocolates, onSelectChocolate }) 
             </form>
           </section>
         </div>
-
-        {/* Sidebar */}
         <div>
           <section className="bg-surface-container p-8 rounded-3xl border border-primary/5">
             <h3 className="text-sm font-bold text-primary uppercase tracking-widest mb-6 border-b border-primary/10 pb-4">Analisi Attività</h3>
             <div className="space-y-6">
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-on-surface-variant font-medium">Note Aromatiche Votate</span>
-                <span className="text-sm font-bold text-primary">{userAromaVotes.length}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-on-surface-variant font-medium">Valutazioni Fornite</span>
-                <span className="text-sm font-bold text-primary">{userRatings.length}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-xs text-on-surface-variant font-medium">Membro dal</span>
-                <span className="text-sm font-bold text-primary capitalize">{memberSince}</span>
-              </div>
+              <div className="flex justify-between items-center"><span className="text-xs text-on-surface-variant font-medium">Note Aromatiche Votate</span><span className="text-sm font-bold text-primary">{userAromaVotes.length}</span></div>
+              <div className="flex justify-between items-center"><span className="text-xs text-on-surface-variant font-medium">Valutazioni Fornite</span><span className="text-sm font-bold text-primary">{userRatings.length}</span></div>
+              <div className="flex justify-between items-center"><span className="text-xs text-on-surface-variant font-medium">Membro dal</span><span className="text-sm font-bold text-primary capitalize">{memberSince}</span></div>
             </div>
           </section>
         </div>
       </div>
 
-      {/* Aroma Votes Section */}
+      {/* Aroma Votes */}
       <section className="mt-12 bg-white p-8 rounded-3xl border border-primary/10 shadow-sm overflow-hidden">
-        <div className="flex items-center gap-2 mb-8">
-          <Fingerprint size={24} className="text-secondary" />
-          <h3 className="text-lg font-bold text-primary uppercase tracking-widest">Le Mie Note Aromatiche</h3>
-        </div>
+        <div className="flex items-center gap-2 mb-8"><Fingerprint size={24} className="text-secondary" /><h3 className="text-lg font-bold text-primary uppercase tracking-widest">Le Mie Note Aromatiche</h3></div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {Object.keys(aromaVotesByChocolate).length === 0 ? (
             <div className="md:col-span-2 lg:col-span-3 py-16 text-center border border-dashed border-stone-100 rounded-3xl">
-              <Fingerprint size={48} className="text-stone-100 mx-auto mb-4" />
-              <p className="text-sm text-stone-400 font-bold uppercase tracking-widest">Nessun voto aromatico registrato</p>
+              <Fingerprint size={48} className="text-stone-100 mx-auto mb-4" /><p className="text-sm text-stone-400 font-bold uppercase tracking-widest">Nessun voto aromatico registrato</p>
             </div>
           ) : (
             Object.entries(aromaVotesByChocolate).map(([chocId, votes]) => {
               const choco = chocolates.find(c => c.id === chocId);
               return (
                 <div key={chocId} className="space-y-4 p-6 bg-stone-50/50 rounded-2xl border border-stone-100 group hover:border-secondary/20 transition-all">
-                  <button onClick={() => onSelectChocolate(chocId)} className="text-left w-full">
+                  <button onClick={() => navigate(`/chocolate/${chocId}`)} className="text-left w-full">
                     <div className="flex items-center gap-3 mb-2">
                       {choco?.imageUrl && <img src={choco.imageUrl} className="w-10 h-10 rounded-lg object-cover shadow-sm bg-white" alt="" />}
                       <div>
@@ -301,8 +254,7 @@ export const ProfileView: React.FC<Props> = ({ chocolates, onSelectChocolate }) 
                       return (
                         <div key={v.id} className="flex items-center gap-2 px-4 py-2 rounded-full border shadow-sm transition-all hover:scale-105"
                           style={{ backgroundColor: p.hex_color ? `${p.hex_color}15` : '#f3f4f6', borderColor: p.hex_color ? `${p.hex_color}50` : '#e5e7eb' }}>
-                          <Icon size={12} color={p.hex_color || undefined} />
-                          <span className="text-[10px] font-black uppercase text-primary tracking-wider">{p.name}</span>
+                          <Icon size={12} color={p.hex_color || undefined} /><span className="text-[10px] font-black uppercase text-primary tracking-wider">{p.name}</span>
                         </div>
                       );
                     })}

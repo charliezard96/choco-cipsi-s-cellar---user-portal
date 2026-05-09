@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Producer } from '../types';
 import { ArrowRight, Search } from 'lucide-react';
 import { getCountryCode } from '../lib/countryUtils';
@@ -6,10 +7,10 @@ import { getCountryCode } from '../lib/countryUtils';
 interface Props {
   producers: Producer[];
   loading: boolean;
-  onSelectProducer: (id: string) => void;
 }
 
-export const ProducersView: React.FC<Props> = ({ producers, loading, onSelectProducer }) => {
+export const ProducersView: React.FC<Props> = ({ producers, loading }) => {
+  const navigate = useNavigate();
   const [selectedOrigin, setSelectedOrigin] = useState('All');
   const [search, setSearch] = useState('');
 
@@ -25,11 +26,7 @@ export const ProducersView: React.FC<Props> = ({ producers, loading, onSelectPro
   }, [producers, selectedOrigin, search]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-      </div>
-    );
+    return <div className="flex items-center justify-center h-64"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>;
   }
 
   return (
@@ -37,7 +34,7 @@ export const ProducersView: React.FC<Props> = ({ producers, loading, onSelectPro
       <header className="mb-16">
         <h1 className="text-5xl font-bold text-primary mb-4">Produttori Bean-to-Bar</h1>
         <p className="text-lg text-on-surface-variant max-w-2xl leading-relaxed">
-          Una guida curata dei più illustri produttori di cioccolato al mondo, dedicati alla preservazione del terroir e della metodologia artigianale.
+          Una guida curata dei più illustri produttori di cioccolato al mondo.
         </p>
       </header>
 
@@ -45,8 +42,7 @@ export const ProducersView: React.FC<Props> = ({ producers, loading, onSelectPro
         <div className="flex-grow w-full">
           <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant mb-2 block">Cerca Produttori</label>
           <div className="relative">
-            <input type="text" value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Cerca per nome o località del produttore..."
+            <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Cerca per nome o località..."
               className="w-full bg-white border border-primary/20 rounded-lg px-4 py-3 focus:border-secondary transition-all outline-none" />
             <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant/40 w-5 h-5" />
           </div>
@@ -63,7 +59,7 @@ export const ProducersView: React.FC<Props> = ({ producers, loading, onSelectPro
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
         {filtered.map(producer => (
-          <div key={producer.id} onClick={() => onSelectProducer(producer.id)}
+          <div key={producer.id} onClick={() => navigate(`/producers/${producer.id}`)}
             className="bg-white p-8 border border-primary/10 hover:border-secondary/40 transition-all group flex flex-col gap-6 cursor-pointer h-full">
             <div className="w-full aspect-[3/2] overflow-hidden bg-surface-container shrink-0 shadow-sm border border-primary/5">
               <img src={`https://flagcdn.com/w640/${getCountryCode(producer.location)}.png`}
@@ -77,7 +73,7 @@ export const ProducersView: React.FC<Props> = ({ producers, loading, onSelectPro
                     <img src={producer.logoUrl} className="max-w-full max-h-full object-contain" alt="" />
                   </div>
                 )}
-                <span className="text-[10px] text-secondary uppercase tracking-[0.2em] font-bold block">{producer.location}</span>
+                <span className="text-[10px] text-secondary uppercase tracking-[0.2em] font-bold">{producer.location}</span>
               </div>
               <h3 className="text-3xl text-primary font-bold mb-4 tracking-tight">{producer.name}</h3>
               <p className="text-sm text-on-surface-variant flex-1 leading-relaxed mb-6 line-clamp-3 italic">{producer.description}</p>
