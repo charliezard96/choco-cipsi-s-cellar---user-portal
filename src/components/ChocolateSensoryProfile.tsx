@@ -3,6 +3,7 @@ import { Fingerprint, Users, RefreshCw } from 'lucide-react';
 import { AromaProfile } from '../types';
 import { aromaService } from '../services/aromaService';
 import { getIconHelper } from '../utils/iconUtils';
+import { getAromaColors } from '../utils/colorUtils';
 
 interface Props {
   chocolateId: string;
@@ -67,10 +68,11 @@ export const ChocolateSensoryProfile: React.FC<Props> = ({ chocolateId, userId, 
                 const profile = profiles.find(p => p.id === id);
                 if (!profile) return null;
                 const Icon = getIconHelper(profile.icon_slug, profile.group_name);
+                const colors = getAromaColors(profile.hex_color);
                 return (
                   <div key={id} className="flex items-center gap-2 px-4 py-2 rounded-full border shadow-sm animate-in fade-in zoom-in duration-300"
-                    style={{ backgroundColor: profile.hex_color ? `${profile.hex_color}15` : '#f3f4f6', borderColor: profile.hex_color ? `${profile.hex_color}50` : '#e5e7eb' }}>
-                    <Icon size={14} color={profile.hex_color || undefined} />
+                    style={{ backgroundColor: colors.bg, borderColor: colors.border }}>
+                    <Icon size={14} color={colors.fg} />
                     <span className="text-[10px] font-black uppercase tracking-wider text-primary">{profile.name}</span>
                   </div>
                 );
@@ -103,13 +105,14 @@ export const ChocolateSensoryProfile: React.FC<Props> = ({ chocolateId, userId, 
                 const profile = profiles.find(p => p.id === stat.aroma_id);
                 if (!profile) return null;
                 const Icon = getIconHelper(profile.icon_slug, profile.group_name);
+                const colors = getAromaColors(profile.hex_color);
                 return (
                   <div key={stat.aroma_id} className="space-y-2">
                     <div className="flex items-center justify-between text-xs">
                       <div className="flex items-center gap-3">
                         <span className="font-mono text-[10px] text-stone-300">0{index + 1}</span>
                         <div className="flex items-center gap-2">
-                          <Icon size={16} color={profile.hex_color || undefined} />
+                          <Icon size={16} color={colors.fg} />
                           <span className="font-black text-primary uppercase tracking-wider">{profile.name}</span>
                         </div>
                       </div>
@@ -117,7 +120,7 @@ export const ChocolateSensoryProfile: React.FC<Props> = ({ chocolateId, userId, 
                     </div>
                     <div className="h-1.5 w-full bg-stone-100 rounded-full overflow-hidden">
                       <div className="h-full rounded-full transition-all duration-1000 ease-out"
-                        style={{ width: `${stat.percentage}%`, backgroundColor: profile.hex_color || 'var(--color-primary)' }} />
+                        style={{ width: `${stat.percentage}%`, backgroundColor: colors.fg }} />
                     </div>
                   </div>
                 );
@@ -133,18 +136,19 @@ export const ChocolateSensoryProfile: React.FC<Props> = ({ chocolateId, userId, 
                     const profile = profiles.find(p => p.id === stat.aroma_id);
                     if (!profile) return null;
                     const Icon = getIconHelper(profile.icon_slug, profile.group_name);
+                    const colors = getAromaColors(profile.hex_color);
                     return (
                       <div key={stat.aroma_id} className="space-y-2">
                         <div className="flex items-center justify-between text-[10px]">
                           <div className="flex items-center gap-2">
-                            <Icon size={14} color={profile.hex_color || undefined} />
+                            <Icon size={14} color={colors.fg} />
                             <span className="font-bold text-primary uppercase tracking-wider">{profile.name}</span>
                           </div>
-                          <span className="font-bold text-stone-400">{Math.round(stat.percentage)}%</span>
+                          <span className="font-bold text-stone-500">{Math.round(stat.percentage)}%</span>
                         </div>
                         <div className="h-1 w-full bg-stone-50 rounded-full overflow-hidden">
-                          <div className="h-full rounded-full transition-all duration-1000 ease-out opacity-60"
-                            style={{ width: `${stat.percentage}%`, backgroundColor: profile.hex_color || 'var(--color-primary)' }} />
+                          <div className="h-full rounded-full transition-all duration-1000 ease-out"
+                            style={{ width: `${stat.percentage}%`, backgroundColor: colors.fg }} />
                         </div>
                       </div>
                     );

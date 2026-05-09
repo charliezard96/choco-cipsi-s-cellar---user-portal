@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { AromaProfile } from '../types';
 import { aromaService } from '../services/aromaService';
 import { getIconHelper } from '../utils/iconUtils';
+import { ensureVisible } from '../utils/colorUtils';
 import { RefreshCw, Radar, Info } from 'lucide-react';
 
 /* ── Types ── */
@@ -40,15 +41,16 @@ const WheelTooltip: React.FC<{ active?: boolean; payload?: any[]; profiles: Arom
   const d = payload[0].payload;
   const profile = profiles.find(p => p.name === d.name);
   const Icon = getIconHelper(profile?.icon_slug || null, profile?.group_name || d.name);
+  const visibleColor = ensureVisible(d.hex_color);
 
   return (
     <div className="bg-white p-3 rounded-xl shadow-xl border border-stone-100 animate-in fade-in zoom-in duration-200">
       <div className="flex items-center gap-2 mb-1">
-        <Icon size={14} color={d.hex_color} />
+        <Icon size={14} color={visibleColor} />
         <p className="text-[10px] font-black text-primary uppercase tracking-widest">{d.name}</p>
       </div>
       <div className="flex items-center gap-2 ml-5">
-        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: d.hex_color }} />
+        <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: visibleColor }} />
         <p className="text-[10px] font-bold text-secondary">{d.value} {d.value === 1 ? 'voto' : 'voti'}</p>
       </div>
     </div>
@@ -170,7 +172,7 @@ export const ChocolateFlavorWheel: React.FC<Props> = ({ chocolateId, profiles, r
                       .map(sg => (
                         <div key={sg.name} className="flex items-center justify-between group/item">
                           <span className="text-[9px] font-bold text-stone-400 uppercase tracking-widest group-hover/item:text-stone-600 transition-colors">{sg.name}</span>
-                          <span className="text-[9px] font-mono text-stone-300">{Math.round((sg.value / totalVotes) * 100)}%</span>
+                          <span className="text-[9px] font-mono text-stone-500">{Math.round((sg.value / totalVotes) * 100)}%</span>
                         </div>
                       ))}
                   </div>

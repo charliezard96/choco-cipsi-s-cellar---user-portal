@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Search, ChevronRight, ChevronLeft, Check, RefreshCw, X } from 'lucide-react';
 import { AromaProfile, NoteVote } from '../types';
 import { getIconHelper } from '../utils/iconUtils';
+import { getAromaColors, ensureVisible } from '../utils/colorUtils';
 
 interface AromaVotingProps {
   chocolateId: string;
@@ -42,6 +43,7 @@ export const AromaVoting: React.FC<AromaVotingProps> = ({ profiles, votes, onVot
   const renderNote = (p: AromaProfile) => {
     const vote = votes.find(v => v.aroma_id === p.id);
     const IconComp = getIconHelper(p.icon_slug, p.group_name);
+    const colors = getAromaColors(p.hex_color);
     const isVoted = vote?.user_voted;
     const isProcessing = votingId === p.id;
 
@@ -53,8 +55,8 @@ export const AromaVoting: React.FC<AromaVotingProps> = ({ profiles, votes, onVot
         }`}>
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-full flex items-center justify-center transition-transform group-active:scale-90"
-            style={{ backgroundColor: p.hex_color ? `${p.hex_color}25` : '#f3f4f6' }}>
-            {isProcessing ? <RefreshCw size={16} className="animate-spin text-stone-400" /> : <IconComp size={20} color={p.hex_color || undefined} />}
+            style={{ backgroundColor: colors.bg }}>
+            {isProcessing ? <RefreshCw size={16} className="animate-spin text-stone-400" /> : <IconComp size={20} color={colors.fg} />}
           </div>
           <div>
             <span className="text-[11px] font-black text-primary uppercase tracking-wider block">{p.name}</span>
@@ -87,13 +89,14 @@ export const AromaVoting: React.FC<AromaVotingProps> = ({ profiles, votes, onVot
             <div className="p-2 space-y-1">
               {searchResults.map(p => {
                 const Icon = getIconHelper(p.icon_slug, p.group_name);
+                const colors = getAromaColors(p.hex_color);
                 return (
                   <button key={p.id}
                     onClick={() => { handleToggleVote(p.id); setSearchTerm(''); }}
                     className="w-full flex items-center justify-between p-3 hover:bg-stone-50 rounded-xl transition-colors text-left">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full flex items-center justify-center bg-stone-100">
-                        <Icon size={14} color={p.hex_color || undefined} />
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: colors.bg }}>
+                        <Icon size={14} color={colors.fg} />
                       </div>
                       <div>
                         <p className="text-xs font-black text-primary uppercase tracking-wider">{p.name}</p>

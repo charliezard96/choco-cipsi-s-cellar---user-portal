@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Chocolate, Producer } from '../types';
 import { getIconHelper } from '../utils/iconUtils';
+import { getAromaColors } from '../utils/colorUtils';
 import { findProducerForChocolate } from '../utils/matchUtils';
 import { BookOpen, Verified, ArrowLeft, Star, LogIn, RefreshCw, Fingerprint } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -121,10 +122,11 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers }) => {
           {officialNotes.length > 0 ? (
             officialNotes.map(profile => {
               const Icon = getIconHelper(profile.icon_slug, profile.group_name);
+              const colors = getAromaColors(profile.hex_color);
               return (
                 <div key={profile.id} className="flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all hover:scale-105 shadow-sm"
-                  style={{ backgroundColor: profile.hex_color ? `${profile.hex_color}15` : 'transparent', borderColor: profile.hex_color ? `${profile.hex_color}50` : 'rgba(var(--color-primary), 0.1)' }}>
-                  <Icon size={18} strokeWidth={2.5} color={profile.hex_color || 'inherit'} />
+                  style={{ backgroundColor: colors.bg, borderColor: colors.border }}>
+                  <Icon size={18} strokeWidth={2.5} color={colors.fg} />
                   <span className="text-xs font-black uppercase tracking-wider text-primary">{profile.name}</span>
                 </div>
               );

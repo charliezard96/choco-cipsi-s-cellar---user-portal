@@ -5,6 +5,7 @@ import { User, Save, MapPin, AlignLeft, RefreshCw, Star, X, ChevronLeft, Chevron
 import { motion, AnimatePresence } from 'motion/react';
 import { Chocolate, AromaProfile } from '../types';
 import { getIconHelper } from '../utils/iconUtils';
+import { getAromaColors } from '../utils/colorUtils';
 import { aromaService } from '../services/aromaService';
 import { ratingService } from '../services/ratingService';
 import { profileService } from '../services/profileService';
@@ -251,10 +252,11 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
                       const p = aromaProfiles.find(ap => ap.id === v.aroma_id);
                       if (!p) return null;
                       const Icon = getIconHelper(p.icon_slug, p.group_name);
+                      const colors = getAromaColors(p.hex_color);
                       return (
                         <div key={v.id} className="flex items-center gap-2 px-4 py-2 rounded-full border shadow-sm transition-all hover:scale-105"
-                          style={{ backgroundColor: p.hex_color ? `${p.hex_color}15` : '#f3f4f6', borderColor: p.hex_color ? `${p.hex_color}50` : '#e5e7eb' }}>
-                          <Icon size={12} color={p.hex_color || undefined} /><span className="text-[10px] font-black uppercase text-primary tracking-wider">{p.name}</span>
+                          style={{ backgroundColor: colors.bg, borderColor: colors.border }}>
+                          <Icon size={12} color={colors.fg} /><span className="text-[10px] font-black uppercase text-primary tracking-wider">{p.name}</span>
                         </div>
                       );
                     })}
