@@ -29,14 +29,12 @@ export const ratingService = {
   },
 
   async saveRating(chocolateId: string, userId: string, rating: number): Promise<void> {
-    // Upsert: inserisce o aggiorna in un'unica operazione
     const { error } = await supabase
       .from('user_ratings')
       .upsert(
         { user_id: userId, chocolate_id: chocolateId, rating },
         { onConflict: 'user_id,chocolate_id' }
       );
-
     if (error) throw error;
   },
 
