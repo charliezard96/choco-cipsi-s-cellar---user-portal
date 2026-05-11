@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AromaProfile, NoteVote } from '../types';
+import { AromaProfile, BarLevelTag, NoteVote } from '../types';
 import { aromaService } from '../services/aromaService';
 import { ratingService } from '../services/ratingService';
 
 export const useChocolateDetail = (chocolateId: string, userId?: string) => {
   const [aromaProfiles, setAromaProfiles] = useState<AromaProfile[]>([]);
   const [officialNotes, setOfficialNotes] = useState<AromaProfile[]>([]);
+  const [barLevelTags, setBarLevelTags] = useState<BarLevelTag[]>([]);
   const [noteVotes, setNoteVotes] = useState<NoteVote[]>([]);
   const [userRating, setUserRating] = useState<number | null>(null);
   const [avgRating, setAvgRating] = useState<number | null>(null);
@@ -17,16 +18,18 @@ export const useChocolateDetail = (chocolateId: string, userId?: string) => {
     try {
       setLoading(true);
 
-      const [profiles, votes, ratings] = await Promise.all([
+      const [profiles, votes, ratings, tags] = await Promise.all([
         aromaService.fetchProfiles(),
         aromaService.fetchVotes(chocolateId, userId),
         ratingService.fetchRatings(chocolateId),
+        aromaService.fetchBarLevelTags(chocolateId),
       ]);
 
       setAromaProfiles(profiles);
       setNoteVotes(votes);
       setAvgRating(ratings.avgRating);
       setTotalRatings(ratings.totalRatings);
+      setBarLevelTags(tags);
 
       const officialIds = await aromaService.fetchOfficialNotes(chocolateId);
       setOfficialNotes(profiles.filter(p => officialIds.includes(p.id)));
@@ -62,7 +65,7 @@ export const useChocolateDetail = (chocolateId: string, userId?: string) => {
   }, [chocolateId, userId, noteVotes]);
 
   return {
-    aromaProfiles, officialNotes, noteVotes,
+    aromaProfiles, officialNotes, barLevelTags, noteVotes,
     userRating, avgRating, totalRatings,
     loading, refreshTrigger,
     handleRate, handleToggleVote,

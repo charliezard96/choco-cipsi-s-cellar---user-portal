@@ -46,6 +46,12 @@ export interface NoteVote {
   user_voted: boolean;
 }
 
+export interface BarLevelTag {
+  bar_id: number;
+  group_name: string;
+  subgroup_name: string;
+}
+
 export interface TastingEvent {
   id: string;
   title: string;

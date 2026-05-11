@@ -1,11 +1,20 @@
 import { supabase } from '../lib/supabase';
-import { AromaProfile, NoteVote } from '../types';
+import { AromaProfile, BarLevelTag, NoteVote } from '../types';
 
 export const aromaService = {
   async fetchProfiles(): Promise<AromaProfile[]> {
     const { data, error } = await supabase.from('aroma_profiles').select('*');
     if (error) throw error;
     return data || [];
+  },
+
+  async fetchBarLevelTags(chocolateId: string): Promise<BarLevelTag[]> {
+    const { data, error } = await supabase
+      .from('bar_level_tags')
+      .select('bar_id, group_name, subgroup_name')
+      .eq('bar_id', chocolateId);
+    if (error) throw error;
+    return (data || []) as BarLevelTag[];
   },
 
   async fetchOfficialNotes(chocolateId: string): Promise<string[]> {
