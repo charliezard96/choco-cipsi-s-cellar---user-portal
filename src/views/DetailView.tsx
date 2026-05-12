@@ -39,6 +39,21 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
     return () => clearTimeout(t);
   }, [statusMsg]);
 
+  // Must be before early returns to satisfy Rules of Hooks
+  const groupedTags = useMemo(() => {
+    const map = new Map<string, { hasGroupTag: boolean; subgroups: string[]; hex_color: string | null; icon_slug: string | null }>();
+    barLevelTags.forEach(tag => {
+      if (!map.has(tag.group_name)) {
+        const rep = aromaProfiles.find(p => p.group_name === tag.group_name);
+        map.set(tag.group_name, { hasGroupTag: false, subgroups: [], hex_color: rep?.hex_color ?? null, icon_slug: rep?.icon_slug ?? null });
+      }
+      const entry = map.get(tag.group_name)!;
+      if (tag.subgroup_name === '') entry.hasGroupTag = true;
+      else entry.subgroups.push(tag.subgroup_name);
+    });
+    return Array.from(map.entries()).map(([groupName, data]) => ({ groupName, ...data }));
+  }, [barLevelTags, aromaProfiles]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-32">
@@ -57,20 +72,6 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
   }
 
   const producer = findProducerForChocolate(chocolate, producers);
-
-  const groupedTags = useMemo(() => {
-    const map = new Map<string, { hasGroupTag: boolean; subgroups: string[]; hex_color: string | null; icon_slug: string | null }>();
-    barLevelTags.forEach(tag => {
-      if (!map.has(tag.group_name)) {
-        const rep = aromaProfiles.find(p => p.group_name === tag.group_name);
-        map.set(tag.group_name, { hasGroupTag: false, subgroups: [], hex_color: rep?.hex_color ?? null, icon_slug: rep?.icon_slug ?? null });
-      }
-      const entry = map.get(tag.group_name)!;
-      if (tag.subgroup_name === '') entry.hasGroupTag = true;
-      else entry.subgroups.push(tag.subgroup_name);
-    });
-    return Array.from(map.entries()).map(([groupName, data]) => ({ groupName, ...data }));
-  }, [barLevelTags, aromaProfiles]);
 
   const onRate = async (rating: number) => {
     if (!user) { setShowAuthModal(true, 'login'); return; }
