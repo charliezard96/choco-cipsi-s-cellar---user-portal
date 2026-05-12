@@ -61,6 +61,17 @@ const WheelTooltip: React.FC<{ active?: boolean; payload?: any[]; profiles: Arom
 export const ChocolateFlavorWheel: React.FC<Props> = ({ chocolateId, profiles, refreshTrigger }) => {
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<any[]>([]);
+  const wheelRef = React.useRef<HTMLDivElement>(null);
+  const [wheelSize, setWheelSize] = useState(500);
+
+  useEffect(() => {
+    const update = () => {
+      if (wheelRef.current) setWheelSize(Math.min(wheelRef.current.offsetWidth, 500));
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => window.removeEventListener('resize', update);
+  }, []);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -139,10 +150,11 @@ export const ChocolateFlavorWheel: React.FC<Props> = ({ chocolateId, profiles, r
   }
 
   const GOLD = '#D4AF37';
+  const s = wheelSize / 500;
   const pieLayers = [
-    { data: innerData, inner: '26%', outer: '42%', pad: 3, corner: 8, stroke: 1.5, opacity: 0.95 },
-    { data: midData, inner: '45%', outer: '62%', pad: 2, corner: 6, stroke: 1, opacity: 0.8 },
-    { data: outerData, inner: '65%', outer: '84%', pad: 1, corner: 4, stroke: 0.8, opacity: 0.6 },
+    { data: innerData, inner: 65 * s, outer: 105 * s, pad: 3, corner: 8 * s, stroke: 1.5, opacity: 0.95 },
+    { data: midData, inner: 112 * s, outer: 155 * s, pad: 2, corner: 6 * s, stroke: 1, opacity: 0.8 },
+    { data: outerData, inner: 162 * s, outer: 210 * s, pad: 1, corner: 4 * s, stroke: 0.8, opacity: 0.6 },
   ];
 
   return (
@@ -189,14 +201,14 @@ export const ChocolateFlavorWheel: React.FC<Props> = ({ chocolateId, profiles, r
       </div>
 
       {/* Wheel */}
-      <div className="flex-1 relative group flex items-center justify-center min-h-[280px] sm:min-h-[400px] lg:min-h-[500px]">
+      <div ref={wheelRef} className="flex-1 w-full relative group flex items-center justify-center">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
           <div className="w-24 h-24 rounded-full bg-stone-50/10 flex flex-col items-center justify-center border border-stone-100/30 group-hover:scale-105 transition-transform duration-700 ease-out">
             <Radar className="text-secondary opacity-20 mb-0.5" size={24} />
             <span className="text-[8px] font-black text-stone-300 uppercase tracking-widest leading-none">Aroma Map</span>
           </div>
         </div>
-        <div className="w-full h-[280px] sm:h-[400px] lg:h-[500px] relative z-10">
+        <div style={{ width: wheelSize, height: wheelSize }} className="relative z-10">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Tooltip content={<WheelTooltip profiles={profiles} />} wrapperStyle={{ zIndex: 100 }} />
