@@ -4,7 +4,7 @@ import { Chocolate, Producer } from '../types';
 import { getIconHelper } from '../utils/iconUtils';
 import { getAromaColors } from '../utils/colorUtils';
 import { findProducerForChocolate } from '../utils/matchUtils';
-import { BookOpen, Verified, ArrowLeft, Star, LogIn, RefreshCw, Fingerprint, Tag } from 'lucide-react';
+import { BookOpen, Verified, ArrowLeft, Star, LogIn, RefreshCw, Fingerprint } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { AromaVoting } from '../components/AromaVoting';
 import { ChocolateSensoryProfile } from '../components/ChocolateSensoryProfile';
@@ -137,94 +137,109 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
         ))}
       </div>
 
-      {/* Profilo Aromatico d'Archivio: famiglie + note specifiche */}
+      {/* Profilo Aromatico d'Archivio — card per famiglia */}
       <div className="py-12 border-b border-primary/10">
         <h3 className="text-[10px] font-bold text-on-surface-variant/50 tracking-widest uppercase mb-8 flex items-center gap-2">
           <BookOpen size={14} className="text-secondary" /> Profilo Aromatico d'Archivio
         </h3>
 
-        {/* Famiglie aromatiche (bar_level_tags) */}
-        {groupedTags.length > 0 && (
-          <div className="mb-8">
-            <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest mb-5 flex items-center gap-1.5">
-              <Tag size={11} className="text-secondary/60" /> Famiglie Aromatiche
-            </p>
-            <div className="flex flex-wrap gap-5">
-              {groupedTags.map(({ groupName, hasGroupTag, subgroups, hex_color, icon_slug }) => {
-                const groupColors = getAromaColors(hex_color);
-                const GroupIcon = getIconHelper(icon_slug, groupName);
-                return (
-                  <div key={groupName} className="flex flex-col gap-2">
-                    <div
-                      className={`flex items-center gap-2.5 px-5 py-2.5 rounded-2xl border shadow-sm transition-all hover:scale-105 ${!hasGroupTag ? 'opacity-60' : ''}`}
-                      style={{ backgroundColor: groupColors.bg, borderColor: groupColors.border }}
-                    >
-                      <GroupIcon size={17} strokeWidth={2.5} color={groupColors.fg} />
-                      <span className="text-xs font-black uppercase tracking-wider" style={{ color: groupColors.fg }}>
-                        {groupName}
-                      </span>
-                    </div>
+        {(groupedTags.length > 0 || officialNotes.length > 0) ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Card per ogni famiglia da bar_level_tags */}
+            {groupedTags.map(({ groupName, subgroups, hex_color, icon_slug }) => {
+              const groupColors = getAromaColors(hex_color);
+              const GroupIcon = getIconHelper(icon_slug, groupName);
+              const familyNotes = officialNotes.filter(n => n.group_name === groupName);
+              return (
+                <div key={groupName} className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: groupColors.border }}>
+                  {/* Header */}
+                  <div className="flex items-center gap-2.5 px-5 py-3.5" style={{ backgroundColor: groupColors.bg }}>
+                    <GroupIcon size={17} strokeWidth={2.5} color={groupColors.fg} />
+                    <span className="text-xs font-black uppercase tracking-wider" style={{ color: groupColors.fg }}>{groupName}</span>
+                  </div>
+                  {/* Body */}
+                  <div className="p-4 space-y-3 bg-white/50">
                     {subgroups.length > 0 && (
-                      <div className="flex flex-wrap gap-1.5 pl-3">
+                      <div className="flex flex-wrap gap-1.5">
                         {subgroups.map(sub => {
                           const subRep = aromaProfiles.find(p => p.group_name === groupName && p.subgroup_name === sub);
                           const subColors = getAromaColors(subRep?.hex_color ?? hex_color);
                           return (
-                            <span
-                              key={sub}
-                              className="px-3 py-1 rounded-xl border text-[10px] font-bold uppercase tracking-wide"
-                              style={{ backgroundColor: subColors.bg, borderColor: subColors.border, color: subColors.fg }}
-                            >
+                            <span key={sub} className="px-2.5 py-1 rounded-lg border text-[10px] font-bold uppercase tracking-wide"
+                              style={{ backgroundColor: subColors.bg, borderColor: subColors.border, color: subColors.fg }}>
                               {sub}
                             </span>
                           );
                         })}
                       </div>
                     )}
+                    {familyNotes.length > 0 && (
+                      <>
+                        {subgroups.length > 0 && <div className="h-px bg-primary/5" />}
+                        <div className="flex flex-wrap gap-1.5">
+                          {familyNotes.map(note => {
+                            const NoteIcon = getIconHelper(note.icon_slug, note.group_name);
+                            const noteColors = getAromaColors(note.hex_color);
+                            return (
+                              <div key={note.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border shadow-sm"
+                                style={{ backgroundColor: noteColors.bg, borderColor: noteColors.border }}>
+                                <NoteIcon size={13} strokeWidth={2.5} color={noteColors.fg} />
+                                <span className="text-[10px] font-black uppercase tracking-wide" style={{ color: noteColors.fg }}>{note.name}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+
+            {/* Card per note orfane (famiglia non in bar_level_tags) */}
+            {(() => {
+              const taggedFamilies = new Set(groupedTags.map(g => g.groupName));
+              const orphans = officialNotes.filter(n => !taggedFamilies.has(n.group_name));
+              const orphanFamilies = [...new Set(orphans.map(n => n.group_name))];
+              return orphanFamilies.map(family => {
+                const familyNotes = orphans.filter(n => n.group_name === family);
+                const rep = familyNotes[0];
+                const groupColors = getAromaColors(rep?.hex_color);
+                const GroupIcon = getIconHelper(rep?.icon_slug ?? null, family);
+                return (
+                  <div key={family} className="rounded-2xl border overflow-hidden shadow-sm" style={{ borderColor: groupColors.border }}>
+                    <div className="flex items-center gap-2.5 px-5 py-3.5" style={{ backgroundColor: groupColors.bg }}>
+                      <GroupIcon size={17} strokeWidth={2.5} color={groupColors.fg} />
+                      <span className="text-xs font-black uppercase tracking-wider" style={{ color: groupColors.fg }}>{family}</span>
+                    </div>
+                    <div className="p-4 flex flex-wrap gap-1.5 bg-white/50">
+                      {familyNotes.map(note => {
+                        const NoteIcon = getIconHelper(note.icon_slug, note.group_name);
+                        const noteColors = getAromaColors(note.hex_color);
+                        return (
+                          <div key={note.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border shadow-sm"
+                            style={{ backgroundColor: noteColors.bg, borderColor: noteColors.border }}>
+                            <NoteIcon size={13} strokeWidth={2.5} color={noteColors.fg} />
+                            <span className="text-[10px] font-black uppercase tracking-wide" style={{ color: noteColors.fg }}>{note.name}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
                 );
-              })}
-            </div>
+              });
+            })()}
           </div>
-        )}
-
-        {/* Note specifiche (BAR_AROMA_RELATION) */}
-        {(officialNotes.length > 0 || chocolate.tastingNotes.length > 0) && (
-          <>
-            {groupedTags.length > 0 && (
-              <div className="border-t border-primary/5 pt-7 mb-5">
-                <p className="text-[10px] font-bold text-on-surface-variant/40 uppercase tracking-widest flex items-center gap-1.5">
-                  <Fingerprint size={11} className="text-secondary/60" /> Note Specifiche
-                </p>
+        ) : chocolate.tastingNotes.length > 0 ? (
+          <div className="flex flex-wrap gap-4">
+            {chocolate.tastingNotes.map(name => (
+              <div key={name} className="flex items-center gap-3 px-6 py-3 rounded-2xl border border-primary/10 bg-stone-50/50 shadow-sm">
+                <Verified size={16} className="text-stone-300" />
+                <span className="text-xs font-black uppercase tracking-wider text-stone-400">{name}</span>
               </div>
-            )}
-            <div className="flex flex-wrap gap-4">
-              {officialNotes.length > 0 ? (
-                officialNotes.map(profile => {
-                  const Icon = getIconHelper(profile.icon_slug, profile.group_name);
-                  const colors = getAromaColors(profile.hex_color);
-                  return (
-                    <div key={profile.id} className="flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all hover:scale-105 shadow-sm"
-                      style={{ backgroundColor: colors.bg, borderColor: colors.border }}>
-                      <Icon size={18} strokeWidth={2.5} color={colors.fg} />
-                      <span className="text-xs font-black uppercase tracking-wider text-primary">{profile.name}</span>
-                    </div>
-                  );
-                })
-              ) : (
-                chocolate.tastingNotes.map(name => (
-                  <div key={name} className="flex items-center gap-3 px-6 py-3 rounded-2xl border border-primary/10 bg-stone-50/50 shadow-sm">
-                    <Verified size={16} className="text-stone-300" />
-                    <span className="text-xs font-black uppercase tracking-wider text-stone-400">{name}</span>
-                  </div>
-                ))
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Stato vuoto: nessun tag né note */}
-        {groupedTags.length === 0 && officialNotes.length === 0 && chocolate.tastingNotes.length === 0 && (
+            ))}
+          </div>
+        ) : (
           <div className="flex items-center gap-3 py-2">
             <Fingerprint size={16} className="text-stone-200" />
             <span className="text-sm text-stone-300 italic font-medium">Nessuna nota d'archivio disponibile.</span>
