@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { TastingEvent } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { useAppSettings } from '../contexts/AppSettingsContext';
 import { supabase } from '../lib/supabase';
 import { Loader2, X, Calendar, MapPin, Users, Ticket, Info, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useNavigate } from 'react-router-dom';
 
 export const TastingsView: React.FC = () => {
   const { user, profile } = useAuth();
+  const { tastingsEnabled, loading: settingsLoading } = useAppSettings();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!settingsLoading && !tastingsEnabled) navigate('/', { replace: true });
+  }, [tastingsEnabled, settingsLoading, navigate]);
   const [events, setEvents] = useState<TastingEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<TastingEvent | null>(null);

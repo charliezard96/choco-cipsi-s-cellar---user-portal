@@ -20,6 +20,11 @@ export const authService = {
     return value === true;
   },
 
+  async isTastingsEnabled() {
+    const value = await this.getAppSettings('tastings_enabled');
+    return value !== false; // default true se assente
+  },
+
   async initiateGoogleLogin(redirectTo: string) {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

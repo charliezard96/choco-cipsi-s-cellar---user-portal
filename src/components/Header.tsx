@@ -2,25 +2,29 @@ import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { User, LogOut, LogIn, UserPlus, Menu, X } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { useAppSettings } from '../contexts/AppSettingsContext';
 import { supabase } from '../lib/supabase';
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   { path: '/', label: 'Enciclopedia', matchPaths: ['/', '/chocolate'] },
   { path: '/producers', label: 'Produttori', matchPaths: ['/producers'] },
-  { path: '/tastings', label: 'Degustazioni', matchPaths: ['/tastings'] },
+  { path: '/tastings', label: 'Degustazioni', matchPaths: ['/tastings'], requiresTastings: true },
   { path: '/community', label: 'Community', matchPaths: ['/community'] },
 ];
 
 export const Header: React.FC = () => {
   const { user, profile, setShowAuthModal } = useAuth();
+  const { tastingsEnabled } = useAppSettings();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
-  const isActive = (item: typeof NAV_ITEMS[0]) =>
+  const NAV_ITEMS = BASE_NAV_ITEMS.filter(item => !item.requiresTastings || tastingsEnabled);
+
+  const isActive = (item: typeof BASE_NAV_ITEMS[0]) =>
     item.matchPaths.some(p => p === '/' ? location.pathname === '/' : location.pathname.startsWith(p));
 
-  const NavLink: React.FC<{ item: typeof NAV_ITEMS[0] }> = ({ item }) => (
+  const NavLink: React.FC<{ item: typeof BASE_NAV_ITEMS[0] }> = ({ item }) => (
     <Link to={item.path} onClick={() => setMobileOpen(false)}
       className={`font-serif text-sm transition-all duration-200 ${
         isActive(item)
@@ -36,7 +40,7 @@ export const Header: React.FC = () => {
       <div className="max-w-7xl mx-auto flex justify-between items-center px-8 h-20 w-full">
         <div className="flex items-center gap-12">
           <Link to="/" className="text-xl md:text-2xl font-serif italic text-stone-900 leading-none flex flex-col" aria-label="Torna alla home">
-            <span className="block">The Choco Cipsi's</span>
+            <span className="block">DeCacao</span>
             <span className="block ml-4 md:ml-6 flex items-center gap-2">
               Cellar
               <svg viewBox="0 0 24 24" className="w-7 h-7 text-secondary fill-secondary/10 rotate-12" fill="none" stroke="currentColor" strokeWidth="1.5">
