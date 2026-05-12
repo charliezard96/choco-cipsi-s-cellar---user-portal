@@ -85,8 +85,8 @@ export const ensureVisible = (hex: string | null | undefined, threshold = 180): 
 export const getAromaColors = (hex: string | null | undefined) => ({
   /** Colore per sfondi (originale con opacità, sempre ok) */
   bg: hex ? `${hex}20` : '#f3f4f620',
-  /** Colore per bordi (leggermente più visibile dello sfondo) */
-  border: hex ? `${hex}50` : '#e5e7eb',
+  /** Colore per bordi (usa fg scurito con opacità per garantire visibilità anche su colori chiari) */
+  border: hex ? `${ensureVisible(hex)}66` : '#e5e7eb',
   /** Colore per icone, testo e barre (scurito se necessario) */
   fg: ensureVisible(hex),
 });

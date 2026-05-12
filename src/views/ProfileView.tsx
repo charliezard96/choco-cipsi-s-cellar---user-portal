@@ -282,7 +282,7 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
             <button onClick={() => navigate('/my-cellar')}
               className="inline-flex items-center gap-2 px-6 py-3 bg-stone-50 border border-stone-200 rounded-2xl text-xs font-bold text-primary uppercase tracking-widest hover:border-secondary/30 hover:bg-secondary/5 transition-all">
               <Fingerprint size={14} className="text-secondary" />
-              Vedi tutte le tue {Object.keys(aromaVotesByChocolate).length} tavolette nel Pokédex
+              Vedi tutte le tue {Object.keys(aromaVotesByChocolate).length} tavolette nella tua cantina
             </button>
           </div>
         )}
