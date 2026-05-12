@@ -140,13 +140,13 @@ export const ChocolateFlavorWheel: React.FC<Props> = ({ chocolateId, profiles, r
 
   const GOLD = '#D4AF37';
   const pieLayers = [
-    { data: innerData, inner: 65, outer: 105, pad: 3, corner: 8, stroke: 1.5, opacity: 0.95 },
-    { data: midData, inner: 112, outer: 155, pad: 2, corner: 6, stroke: 1, opacity: 0.8 },
-    { data: outerData, inner: 162, outer: 210, pad: 1, corner: 4, stroke: 0.8, opacity: 0.6 },
+    { data: innerData, inner: '26%', outer: '42%', pad: 3, corner: 8, stroke: 1.5, opacity: 0.95 },
+    { data: midData, inner: '45%', outer: '62%', pad: 2, corner: 6, stroke: 1, opacity: 0.8 },
+    { data: outerData, inner: '65%', outer: '84%', pad: 1, corner: 4, stroke: 0.8, opacity: 0.6 },
   ];
 
   return (
-    <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-12 bg-white p-8 lg:p-12 rounded-[40px] shadow-sm border border-stone-50">
+    <div className="w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-8 lg:gap-12 bg-white p-4 sm:p-8 lg:p-12 rounded-[40px] shadow-sm border border-stone-50">
       {/* Sidebar */}
       <div className="w-full lg:w-1/3 space-y-8">
         <div>
@@ -189,14 +189,14 @@ export const ChocolateFlavorWheel: React.FC<Props> = ({ chocolateId, profiles, r
       </div>
 
       {/* Wheel */}
-      <div className="flex-1 relative group flex items-center justify-center min-h-[500px]">
+      <div className="flex-1 relative group flex items-center justify-center min-h-[280px] sm:min-h-[400px] lg:min-h-[500px]">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
           <div className="w-24 h-24 rounded-full bg-stone-50/10 flex flex-col items-center justify-center border border-stone-100/30 group-hover:scale-105 transition-transform duration-700 ease-out">
             <Radar className="text-secondary opacity-20 mb-0.5" size={24} />
             <span className="text-[8px] font-black text-stone-300 uppercase tracking-widest leading-none">Aroma Map</span>
           </div>
         </div>
-        <div className="w-[500px] h-[500px] relative z-10">
+        <div className="w-full h-[280px] sm:h-[400px] lg:h-[500px] relative z-10">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Tooltip content={<WheelTooltip profiles={profiles} />} wrapperStyle={{ zIndex: 100 }} />

@@ -248,7 +248,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
       </div>
 
       {/* Flavor Wheel */}
-      <div className="mt-20 py-20 border-y border-primary/5 bg-stone-50/30 overflow-hidden relative">
+      <div className="mt-10 md:mt-20 py-10 md:py-20 border-y border-primary/5 bg-stone-50/30 overflow-hidden relative">
         <div className="max-w-4xl mx-auto px-4">
           <ChocolateFlavorWheel chocolateId={chocolate.id} profiles={aromaProfiles} refreshTrigger={refreshTrigger} />
         </div>
