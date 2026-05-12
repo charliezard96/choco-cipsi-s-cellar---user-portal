@@ -14,9 +14,10 @@ import { useChocolateDetail } from '../hooks/useChocolateDetail';
 interface Props {
   chocolates: Chocolate[];
   producers: Producer[];
+  loading?: boolean;
 }
 
-export const DetailView: React.FC<Props> = ({ chocolates, producers }) => {
+export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, setShowAuthModal } = useAuth();
@@ -37,6 +38,14 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers }) => {
     const t = setTimeout(() => setStatusMsg(null), 3000);
     return () => clearTimeout(t);
   }, [statusMsg]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-32">
+        <RefreshCw size={28} className="animate-spin text-secondary" />
+      </div>
+    );
+  }
 
   if (!chocolate) {
     return (

@@ -55,7 +55,7 @@ export default function App() {
             <EncyclopediaView chocolates={chocolates} loading={chocoLoading} />
           } />
           <Route path="/chocolate/:id" element={
-            <DetailView chocolates={chocolates} producers={producers} />
+            <DetailView chocolates={chocolates} producers={producers} loading={chocoLoading} />
           } />
           <Route path="/producers" element={
             <ProducersView producers={producers} loading={producersLoading} />
