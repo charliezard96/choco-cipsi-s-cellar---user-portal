@@ -6,18 +6,19 @@ const FALLBACK_BAR_IMG = 'https://images.unsplash.com/photo-1606312619070-d48b4c
 
 export const chocolateService = {
   async fetchAll(): Promise<Chocolate[]> {
-    const { data, error } = await supabase
-      .from('CHOCO_BARS')
-      .select(`
-        *,
-        BAR_AROMA_RELATION (
-          aroma_profiles ( name )
-        )
-      `);
+    const [{ data, error }, { data: visibleMakers }] = await Promise.all([
+      supabase
+        .from('CHOCO_BARS')
+        .select(`*, BAR_AROMA_RELATION ( aroma_profiles ( name ) )`)
+        .eq('is_visible', true),
+      supabase.from('CHOCO_MAKERS').select('name').eq('is_visible', true),
+    ]);
 
     if (error) throw error;
 
-    return (data || []).map((item: any) => {
+    const visibleMakerNames = new Set((visibleMakers || []).map((m: any) => m.name));
+
+    return (data || []).filter((item: any) => visibleMakerNames.has(item.brand)).map((item: any) => {
       const relationNotes = item.BAR_AROMA_RELATION
         ?.map((rel: any) => rel.aroma_profiles?.name)
         .filter(Boolean) || [];

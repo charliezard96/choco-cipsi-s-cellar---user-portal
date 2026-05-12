@@ -5,7 +5,8 @@ export const producerService = {
   async fetchAll(): Promise<Producer[]> {
     const { data, error } = await supabase
       .from('CHOCO_MAKERS')
-      .select('*');
+      .select('*')
+      .eq('is_visible', true);
 
     if (error) throw error;
 
