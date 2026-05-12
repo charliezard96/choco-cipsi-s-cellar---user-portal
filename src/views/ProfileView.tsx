@@ -227,14 +227,25 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
 
       {/* Aroma Votes */}
       <section className="mt-12 bg-white p-8 rounded-3xl border border-primary/10 shadow-sm overflow-hidden">
-        <div className="flex items-center gap-2 mb-8"><Fingerprint size={24} className="text-secondary" /><h3 className="text-lg font-bold text-primary uppercase tracking-widest">Le Mie Note Aromatiche</h3></div>
+        <div className="flex items-center justify-between gap-2 mb-8">
+          <div className="flex items-center gap-2">
+            <Fingerprint size={24} className="text-secondary" />
+            <h3 className="text-lg font-bold text-primary uppercase tracking-widest">Le Mie Note Aromatiche</h3>
+          </div>
+          {Object.keys(aromaVotesByChocolate).length > 10 && (
+            <button onClick={() => navigate('/my-cellar')}
+              className="text-[10px] font-bold text-secondary uppercase tracking-widest hover:opacity-70 transition-opacity shrink-0">
+              Vedi tutte →
+            </button>
+          )}
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {Object.keys(aromaVotesByChocolate).length === 0 ? (
             <div className="md:col-span-2 lg:col-span-3 py-16 text-center border border-dashed border-stone-100 rounded-3xl">
               <Fingerprint size={48} className="text-stone-100 mx-auto mb-4" /><p className="text-sm text-stone-400 font-bold uppercase tracking-widest">Nessun voto aromatico registrato</p>
             </div>
           ) : (
-            Object.entries(aromaVotesByChocolate).map(([chocId, votes]) => {
+            Object.entries(aromaVotesByChocolate).slice(0, 10).map(([chocId, votes]) => {
               const choco = chocolates.find(c => c.id === chocId);
               return (
                 <div key={chocId} className="space-y-4 p-6 bg-stone-50/50 rounded-2xl border border-stone-100 group hover:border-secondary/20 transition-all">
@@ -266,6 +277,15 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
             })
           )}
         </div>
+        {Object.keys(aromaVotesByChocolate).length > 10 && (
+          <div className="mt-8 pt-6 border-t border-stone-100 text-center">
+            <button onClick={() => navigate('/my-cellar')}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-stone-50 border border-stone-200 rounded-2xl text-xs font-bold text-primary uppercase tracking-widest hover:border-secondary/30 hover:bg-secondary/5 transition-all">
+              <Fingerprint size={14} className="text-secondary" />
+              Vedi tutte le tue {Object.keys(aromaVotesByChocolate).length} tavolette nel Pokédex
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );

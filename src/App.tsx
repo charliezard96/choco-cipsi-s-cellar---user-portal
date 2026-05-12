@@ -8,6 +8,7 @@ import { ProducersView } from './views/Producers';
 import { ProducerDetailView } from './views/ProducerDetailView';
 import { TastingsView } from './views/Tastings';
 import { ProfileView } from './views/ProfileView';
+import { MyCellarView } from './views/MyCellarView';
 import { CommunityView } from './views/Community';
 import { UpdatePasswordView } from './views/UpdatePassword';
 import { AuthCallback } from './views/AuthCallback';
@@ -66,6 +67,9 @@ export default function App() {
           <Route path="/tastings" element={<TastingsView />} />
           <Route path="/profile" element={
             <ProfileView chocolates={chocolates} />
+          } />
+          <Route path="/my-cellar" element={
+            <MyCellarView chocolates={chocolates} />
           } />
           <Route path="/community" element={
             <CommunityView chocolates={chocolates} />

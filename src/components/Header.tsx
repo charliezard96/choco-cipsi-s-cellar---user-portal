@@ -19,7 +19,10 @@ export const Header: React.FC = () => {
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
-  const NAV_ITEMS = BASE_NAV_ITEMS.filter(item => !item.requiresTastings || tastingsEnabled);
+  const NAV_ITEMS = [
+    ...BASE_NAV_ITEMS.filter(item => !item.requiresTastings || tastingsEnabled),
+    ...(user ? [{ path: '/my-cellar', label: 'La Mia Cantina', matchPaths: ['/my-cellar'] }] : []),
+  ];
 
   const isActive = (item: typeof BASE_NAV_ITEMS[0]) =>
     item.matchPaths.some(p => p === '/' ? location.pathname === '/' : location.pathname.startsWith(p));
