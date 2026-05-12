@@ -127,11 +127,11 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
           <div key={m.label}>
             <span className="text-[10px] font-bold text-on-surface-variant/40 block uppercase tracking-widest mb-3">{m.label}</span>
             {m.action ? (
-              <button onClick={m.action} className="text-3xl font-bold text-primary hover:text-secondary transition-colors underline decoration-secondary/30 underline-offset-8 text-left">
+              <button onClick={m.action} className="text-xl sm:text-3xl font-bold text-primary hover:text-secondary transition-colors underline decoration-secondary/30 underline-offset-8 text-left">
                 {m.value}
               </button>
             ) : (
-              <span className="text-3xl font-bold text-primary block leading-none">{m.value}</span>
+              <span className="text-xl sm:text-3xl font-bold text-primary block leading-none">{m.value}</span>
             )}
           </div>
         ))}
@@ -257,17 +257,17 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
       {/* Two-column */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-20 items-stretch">
         <div className="flex flex-col gap-12">
-          <div className="bg-stone-50 p-12 border border-primary/5 shadow-sm rounded-3xl">
+          <div className="bg-stone-50 p-6 md:p-12 border border-primary/5 shadow-sm rounded-3xl">
             <h3 className="text-xl font-bold text-primary mb-8 flex items-center gap-3"><BookOpen className="text-secondary" size={20} /> Descrizione Storica</h3>
             <p className="text-xs text-on-surface-variant/90 leading-relaxed italic font-medium">{chocolate.description}</p>
           </div>
-          <div className="bg-white p-12 border border-primary/10 shadow-sm rounded-3xl flex-1">
+          <div className="bg-white p-6 md:p-12 border border-primary/10 shadow-sm rounded-3xl flex-1">
             <ChocolateSensoryProfile chocolateId={chocolate.id} userId={user?.id} profiles={aromaProfiles} refreshTrigger={refreshTrigger} />
           </div>
         </div>
         <div className="flex flex-col gap-12">
           {/* Ratings */}
-          <div className="bg-white p-12 border border-primary/10 shadow-sm rounded-3xl">
+          <div className="bg-white p-6 md:p-12 border border-primary/10 shadow-sm rounded-3xl">
             <div className="flex justify-between items-start mb-8">
               <div>
                 <h3 className="text-xl font-bold text-primary mb-2">Feedback degli Intenditori</h3>
@@ -282,7 +282,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
             </div>
             <div className="mb-12">
               <p className="text-sm text-on-surface-variant mb-6 font-medium">Come valuteresti questo raccolto specifico?</p>
-              <div className="flex gap-3 items-center">
+              <div className="flex gap-1 sm:gap-3 items-center">
                 {[1, 2, 3, 4, 5].map(star => (
                   <button key={star} disabled={savingRating}
                     onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
@@ -313,7 +313,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
             </div>
           </div>
           {/* Aroma Voting */}
-          <div className="bg-stone-50 p-12 border border-primary/10 shadow-sm rounded-3xl flex-1">
+          <div className="bg-stone-50 p-6 md:p-12 border border-primary/10 shadow-sm rounded-3xl flex-1">
             <div className="mb-10">
               <h3 className="text-xl font-bold text-primary mb-2">Nota la Differenza</h3>
               <p className="text-xs font-bold text-secondary uppercase tracking-widest">Esplora e vota le sfumature sensoriali</p>

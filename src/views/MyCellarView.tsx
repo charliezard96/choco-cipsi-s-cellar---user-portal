@@ -279,7 +279,7 @@ export const MyCellarView: React.FC<Props> = ({ chocolates }) => {
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setNoteModal(null)} className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
             <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }}
-              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-8" onClick={e => e.stopPropagation()}>
+              className="relative w-full max-w-md bg-white rounded-3xl shadow-2xl p-6 md:p-8 max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
               <button onClick={() => setNoteModal(null)} className="absolute top-5 right-5 p-2 hover:bg-stone-100 rounded-full text-stone-400"><X size={18} /></button>
               <div className="flex items-center gap-2 mb-6">
                 <NotebookPen size={18} className="text-secondary" />

@@ -164,7 +164,7 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2">
-          <section className="bg-white p-8 rounded-3xl border border-primary/10 shadow-sm">
+          <section className="bg-white p-5 md:p-8 rounded-3xl border border-primary/10 shadow-sm">
             <h2 className="text-xl font-bold text-primary mb-8 flex items-center gap-3"><User size={20} className="text-secondary" /> Impostazioni Profilo</h2>
             <form onSubmit={handleSave} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -214,7 +214,7 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
           </section>
         </div>
         <div>
-          <section className="bg-surface-container p-8 rounded-3xl border border-primary/5">
+          <section className="bg-surface-container p-5 md:p-8 rounded-3xl border border-primary/5">
             <h3 className="text-sm font-bold text-primary uppercase tracking-widest mb-6 border-b border-primary/10 pb-4">Analisi Attività</h3>
             <div className="space-y-6">
               <div className="flex justify-between items-center"><span className="text-xs text-on-surface-variant font-medium">Note Aromatiche Votate</span><span className="text-sm font-bold text-primary">{userAromaVotes.length}</span></div>
@@ -226,7 +226,7 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
       </div>
 
       {/* Aroma Votes */}
-      <section className="mt-12 bg-white p-8 rounded-3xl border border-primary/10 shadow-sm overflow-hidden">
+      <section className="mt-12 bg-white p-5 md:p-8 rounded-3xl border border-primary/10 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between gap-2 mb-8">
           <div className="flex items-center gap-2">
             <Fingerprint size={24} className="text-secondary" />
