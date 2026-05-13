@@ -10,6 +10,7 @@ import { AromaVoting } from '../components/AromaVoting';
 import { ChocolateSensoryProfile } from '../components/ChocolateSensoryProfile';
 import { ChocolateFlavorWheel } from '../components/ChocolateFlavorWheel';
 import { useChocolateDetail } from '../hooks/useChocolateDetail';
+import { OriginMap } from '../components/OriginMap';
 
 interface Props {
   chocolates: Chocolate[];
@@ -136,6 +137,9 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
           </div>
         ))}
       </div>
+
+      {/* Mappa origine */}
+      <OriginMap origin={chocolate.origin} className="mb-12 max-h-52" />
 
       {/* Profilo Aromatico d'Archivio — card per famiglia */}
       <div className="py-12 border-b border-primary/10">

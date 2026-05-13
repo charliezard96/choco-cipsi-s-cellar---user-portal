@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Verified, RefreshCw } from 'lucide-react';
-
+import { OriginMap } from '../components/OriginMap';
 import { Chocolate, AromaProfile, BarLevelTag } from '../types';
 import { aromaService } from '../services/aromaService';
 import { getIconHelper } from '../utils/iconUtils';
@@ -124,6 +124,12 @@ export const CompareView: React.FC<Props> = ({ chocolates }) => {
             <span className="text-sm font-bold text-primary leading-tight block">{bar.name}</span>
           </button>
         ))}
+      </div>
+
+      {/* Mappe origine */}
+      <div className="grid grid-cols-2 gap-6 mb-6">
+        <OriginMap origin={a.origin} className="h-36" />
+        <OriginMap origin={b.origin} className="h-36" />
       </div>
 
       {/* Metadata */}
