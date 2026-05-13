@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Producer, Chocolate } from '../types';
 import { getChocolatesByProducer } from '../utils/matchUtils';
 import { ArrowLeft, MapPin, Users, Sparkles, BookOpen, Globe } from 'lucide-react';
+import { OriginMap } from '../components/OriginMap';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 interface Props {
   producers: Producer[];
@@ -14,6 +16,7 @@ export const ProducerDetailView: React.FC<Props> = ({ producers, chocolates }) =
   const navigate = useNavigate();
 
   const producer = producers.find(p => p.id === id || p.name === id);
+  usePageMeta(producer?.name, producer ? `Scopri le tavolette di ${producer.name}, produttore con sede in ${producer.location}.` : undefined);
 
   if (!producer) {
     return (
@@ -89,6 +92,8 @@ export const ProducerDetailView: React.FC<Props> = ({ producers, chocolates }) =
             </div>
           </div>
         </header>
+
+        {producer.location && <OriginMap origin={producer.location} className="mb-12" />}
 
         <section>
           <h2 className="text-3xl font-bold text-primary mb-10 pb-4 border-b border-primary/10 flex items-center justify-between">

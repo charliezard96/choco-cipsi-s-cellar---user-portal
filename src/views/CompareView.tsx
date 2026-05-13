@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Verified, RefreshCw } from 'lucide-react';
 import { OriginMap } from '../components/OriginMap';
+import { usePageMeta } from '../hooks/usePageMeta';
 import { Chocolate, AromaProfile, BarLevelTag } from '../types';
 import { aromaService } from '../services/aromaService';
 import { getIconHelper } from '../utils/iconUtils';
@@ -56,6 +57,7 @@ const AromaColumn: React.FC<{ grouped: ReturnType<typeof buildGrouped>; profiles
 };
 
 export const CompareView: React.FC<Props> = ({ chocolates }) => {
+  usePageMeta('Confronto Tavolette');
   const [params] = useSearchParams();
   const navigate = useNavigate();
   const idA = params.get('a');

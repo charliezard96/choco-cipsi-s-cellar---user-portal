@@ -1,19 +1,21 @@
 import { supabase } from '../lib/supabase';
 
+const ratingsCache = new Map<string, Promise<{ avgRating: number | null; totalRatings: number }>>();
+
 export const ratingService = {
-  async fetchRatings(chocolateId: string) {
-    const { data, error } = await supabase
-      .from('user_ratings')
-      .select('rating')
-      .eq('chocolate_id', chocolateId);
-
-    if (error) throw error;
-
-    const ratings = data?.map(r => r.rating) || [];
-    return {
-      avgRating: ratings.length > 0 ? ratings.reduce((a, b) => a + b, 0) / ratings.length : null,
-      totalRatings: ratings.length,
-    };
+  fetchRatings(chocolateId: string) {
+    if (!ratingsCache.has(chocolateId)) {
+      const p = Promise.resolve(supabase.from('user_ratings').select('rating').eq('chocolate_id', chocolateId)).then(({ data, error }) => {
+        if (error) { ratingsCache.delete(chocolateId); throw error; }
+        const ratings = data?.map(r => r.rating) || [];
+        return {
+          avgRating: ratings.length > 0 ? ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length : null,
+          totalRatings: ratings.length,
+        };
+      });
+      ratingsCache.set(chocolateId, p);
+    }
+    return ratingsCache.get(chocolateId)!;
   },
 
   async fetchUserRating(chocolateId: string, userId: string): Promise<number | null> {
@@ -36,6 +38,7 @@ export const ratingService = {
         { onConflict: 'user_id,chocolate_id' }
       );
     if (error) throw error;
+    ratingsCache.delete(chocolateId);
   },
 
   /** Tutte le valutazioni di un utente */

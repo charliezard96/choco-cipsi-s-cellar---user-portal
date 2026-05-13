@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { usePageMeta } from '../hooks/usePageMeta';
 import { Chocolate, AromaProfile } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { profileService } from '../services/profileService';
@@ -27,6 +28,7 @@ interface NoteModal {
 }
 
 export const MyCellarView: React.FC<Props> = ({ chocolates }) => {
+  usePageMeta('La Mia Cantina');
   const navigate = useNavigate();
   const { user } = useAuth();
 

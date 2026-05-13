@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, UserProfile } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
+import { usePageMeta } from '../hooks/usePageMeta';
 import { User, Save, MapPin, AlignLeft, RefreshCw, Star, X, ChevronLeft, ChevronRight, BookOpen, Camera, Loader2, Fingerprint } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Chocolate, AromaProfile } from '../types';
@@ -17,22 +19,19 @@ interface Props {
 const ITEMS_PER_PAGE = 10;
 
 export const ProfileView: React.FC<Props> = ({ chocolates }) => {
+  usePageMeta('Il Mio Profilo');
   const navigate = useNavigate();
   const { profile, user, loading, refreshProfile } = useAuth();
+  const { addToast } = useToast();
   const [formData, setFormData] = useState<Partial<UserProfile>>({});
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [userRatings, setUserRatings] = useState<any[]>([]);
   const [userAromaVotes, setUserAromaVotes] = useState<any[]>([]);
   const [aromaProfiles, setAromaProfiles] = useState<AromaProfile[]>([]);
-  const [statusMsg, setStatusMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (statusMsg) { const t = setTimeout(() => setStatusMsg(null), 3000); return () => clearTimeout(t); }
-  }, [statusMsg]);
 
   useEffect(() => {
     if (!profile || !user) return;
@@ -48,21 +47,21 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
     try {
       await profileService.uploadAvatar(user.id, e.target.files[0]);
       await refreshProfile();
-      setStatusMsg({ text: 'Avatar aggiornato!', type: 'success' });
+      addToast('Avatar aggiornato!', 'success');
     } catch (err: any) {
-      setStatusMsg({ text: `Upload fallito: ${err.message}`, type: 'error' });
+      addToast(`Upload fallito: ${err.message}`, 'error');
     } finally { setUploading(false); }
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    setSaving(true); setStatusMsg(null);
+    setSaving(true);
     try {
       await profileService.update(user.id, { username: formData.username, name: formData.name, surname: formData.surname, about_me: formData.aboutMe, favourite_origin: formData.favouriteOrigin });
       await refreshProfile();
-      setStatusMsg({ text: 'Profilo aggiornato!', type: 'success' });
-    } catch { setStatusMsg({ text: 'Aggiornamento fallito.', type: 'error' }); }
+      addToast('Profilo aggiornato!', 'success');
+    } catch { addToast('Aggiornamento fallito.', 'error'); }
     finally { setSaving(false); }
   };
 
@@ -209,7 +208,6 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
                 {saving ? <RefreshCw className="animate-spin w-4 h-4" /> : <Save size={18} />}
                 {saving ? 'Salvataggio...' : 'Aggiorna Profilo Intenditore'}
               </button>
-              {statusMsg && <p className={`text-center text-[10px] font-bold uppercase tracking-widest ${statusMsg.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{statusMsg.text}</p>}
             </form>
           </section>
         </div>

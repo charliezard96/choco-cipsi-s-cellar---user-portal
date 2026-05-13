@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { TastingEvent } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useAppSettings } from '../contexts/AppSettingsContext';
@@ -6,8 +6,10 @@ import { supabase } from '../lib/supabase';
 import { Loader2, X, Calendar, MapPin, Users, Ticket, Info, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 export const TastingsView: React.FC = () => {
+  usePageMeta('Degustazioni', 'Partecipa agli eventi di degustazione del cioccolato fine.');
   const { user, profile } = useAuth();
   const { tastingsEnabled, loading: settingsLoading } = useAppSettings();
   const navigate = useNavigate();
@@ -18,6 +20,15 @@ export const TastingsView: React.FC = () => {
   const [events, setEvents] = useState<TastingEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<TastingEvent | null>(null);
+  const [eventFilter, setEventFilter] = useState<'upcoming' | 'past'>('upcoming');
+
+  const filteredEvents = useMemo(() => {
+    const now = new Date();
+    return events.filter(e => {
+      const d = new Date(e.event_date);
+      return eventFilter === 'upcoming' ? d >= now : d < now;
+    });
+  }, [events, eventFilter]);
 
   useEffect(() => {
     fetchEvents();
@@ -93,6 +104,7 @@ export const TastingsView: React.FC = () => {
           {[
             { n: '01', title: 'Aspetto', desc: 'Esamina la lucentezza e il colore. Un temperaggio perfetto produce una brillantezza radiosa e l\'assenza di affioramenti.', tags: ['Lucentezza', 'Snap'], dark: false },
             { n: '02', title: 'Aroma', desc: 'Copri il cioccolato con le mani per scaldarlo leggermente. Inspira le note di testa: spesso floreali, speziate o fruttate.', tags: ['Floreale', 'Terroso'], dark: true },
+            { n: '04', title: 'Finale', desc: 'Valuta la persistenza e la complessità del retro-gusto. I migliori cru evolvono per oltre un minuto, con note sempre più profonde.', tags: ['Persistenza', 'Complessità'], dark: false },
           ].map(step => (
             <div key={step.n} className={`p-8 border border-primary/10 rounded-lg flex flex-col ${step.dark ? 'bg-primary text-white' : 'bg-surface-container-low'}`}>
               <span className={`text-4xl font-bold mb-6 opacity-50 ${step.dark ? 'text-secondary' : 'text-secondary'}`}>{step.n}</span>
@@ -105,7 +117,7 @@ export const TastingsView: React.FC = () => {
               </div>
             </div>
           ))}
-          <div className="md:col-span-2 bg-surface-container-highest p-8 border border-primary/10 rounded-lg relative overflow-hidden group">
+          <div className="bg-surface-container-highest p-8 border border-primary/10 rounded-lg relative overflow-hidden group">
             <div className="relative z-10 max-w-xs">
               <span className="text-4xl font-bold text-secondary mb-6 opacity-50">03</span>
               <h3 className="text-2xl font-medium text-primary mb-2">Profilo del Palato</h3>
@@ -125,15 +137,25 @@ export const TastingsView: React.FC = () => {
 
       {/* Events */}
       <section className="mb-20">
-        <h2 className="text-3xl font-bold text-primary mb-10">Prossimi Eventi di Degustazione</h2>
+        <div className="flex items-end justify-between mb-10 gap-4 flex-wrap">
+          <h2 className="text-3xl font-bold text-primary">Eventi di Degustazione</h2>
+          <div className="flex gap-1 bg-surface-container rounded-full p-1">
+            {(['upcoming', 'past'] as const).map(f => (
+              <button key={f} onClick={() => setEventFilter(f)}
+                className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${eventFilter === f ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-primary'}`}>
+                {f === 'upcoming' ? 'Prossimi' : 'Passati'}
+              </button>
+            ))}
+          </div>
+        </div>
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <Loader2 className="animate-spin text-primary" size={40} />
             <span className="text-[10px] font-bold uppercase tracking-widest opacity-50">Curatela degli eventi in corso...</span>
           </div>
-        ) : events.length > 0 ? (
+        ) : filteredEvents.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {events.map(event => (
+            {filteredEvents.map(event => (
               <div key={event.id} className="relative group cursor-pointer" onClick={() => setSelectedEvent(event)}>
                 <div className="bg-white rounded-2xl overflow-hidden border border-primary/5 shadow-sm hover:shadow-xl transition-all duration-500 hover:-translate-y-1">
                   <div className="h-48 overflow-hidden">
@@ -160,7 +182,9 @@ export const TastingsView: React.FC = () => {
           </div>
         ) : (
           <div className="col-span-full text-center py-20 border-2 border-dashed border-primary/10 rounded-xl">
-            <p className="text-on-surface-variant font-medium">Nessun evento attualmente in programma.</p>
+            <p className="text-on-surface-variant font-medium">
+              {eventFilter === 'upcoming' ? 'Nessun evento prossimo in programma.' : 'Nessun evento passato trovato.'}
+            </p>
           </div>
         )}
       </section>

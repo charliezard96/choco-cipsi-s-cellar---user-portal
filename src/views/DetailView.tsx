@@ -7,11 +7,13 @@ import { findProducerForChocolate } from '../utils/matchUtils';
 import { BookOpen, Verified, ArrowLeft, Star, LogIn, RefreshCw, Fingerprint, Sparkles, NotebookPen, Check } from 'lucide-react';
 import { cellarService } from '../services/cellarService';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 import { AromaVoting } from '../components/AromaVoting';
 import { ChocolateSensoryProfile } from '../components/ChocolateSensoryProfile';
 import { ChocolateFlavorWheel } from '../components/ChocolateFlavorWheel';
 import { useChocolateDetail } from '../hooks/useChocolateDetail';
 import { OriginMap } from '../components/OriginMap';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 interface Props {
   chocolates: Chocolate[];
@@ -23,27 +25,21 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, setShowAuthModal } = useAuth();
+  const { addToast } = useToast();
+  const chocolate = chocolates.find(c => c.id === id);
+  usePageMeta(chocolate ? `${chocolate.name} — ${chocolate.producer}` : undefined, chocolate ? `Scheda tecnica e profilo aromatico di ${chocolate.name} di ${chocolate.producer}, origine ${chocolate.origin}.` : undefined);
   const [hoverRating, setHoverRating] = useState(0);
   const [savingRating, setSavingRating] = useState(false);
-  const [statusMsg, setStatusMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [personalNote, setPersonalNote] = useState('');
   const [noteDraft, setNoteDraft] = useState('');
   const [editingNote, setEditingNote] = useState(false);
   const [savingNote, setSavingNote] = useState(false);
-
-  const chocolate = chocolates.find(c => c.id === id);
 
   const {
     aromaProfiles, officialNotes, barLevelTags, noteVotes,
     userRating, avgRating, totalRatings,
     refreshTrigger, handleRate, handleToggleVote,
   } = useChocolateDetail(id || '', user?.id);
-
-  useEffect(() => {
-    if (!statusMsg) return;
-    const t = setTimeout(() => setStatusMsg(null), 3000);
-    return () => clearTimeout(t);
-  }, [statusMsg]);
 
   useEffect(() => {
     if (!user || !id) return;
@@ -104,9 +100,9 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
     setSavingRating(true);
     try {
       await handleRate(rating);
-      setStatusMsg({ text: 'Valutazione salvata!', type: 'success' });
+      addToast('Valutazione salvata!', 'success');
     } catch {
-      setStatusMsg({ text: 'Errore nel salvataggio.', type: 'error' });
+      addToast('Errore nel salvataggio.', 'error');
     } finally {
       setSavingRating(false);
     }
@@ -368,8 +364,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
                 ))}
                 {savingRating && <RefreshCw size={24} className="animate-spin text-secondary ml-2" />}
               </div>
-              {statusMsg && <p className={`mt-4 text-[10px] font-bold uppercase tracking-widest ${statusMsg.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>{statusMsg.text}</p>}
-              {userRating && !statusMsg && <p className="mt-4 text-[10px] font-bold text-secondary uppercase tracking-widest">Hai valutato questa voce: {userRating} Stelle</p>}
+              {userRating && <p className="mt-4 text-[10px] font-bold text-secondary uppercase tracking-widest">Hai valutato questa voce: {userRating} Stelle</p>}
               {!user && (
                 <button onClick={() => setShowAuthModal(true, 'login')}
                   className="mt-6 flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest hover:text-secondary transition-colors">

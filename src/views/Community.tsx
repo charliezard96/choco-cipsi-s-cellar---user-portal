@@ -1,16 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Star, Trophy, Users, Loader2, ArrowRight, X, MapPin } from 'lucide-react';
+import { Search, Star, Trophy, Users, Loader2, ArrowRight, X, MapPin, Activity } from 'lucide-react';
 import { Chocolate, CommunityProfile, TopRatedChocolate } from '../types';
 import { profileService } from '../services/profileService';
 import { ratingService } from '../services/ratingService';
 import { motion, AnimatePresence } from 'motion/react';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 interface Props {
   chocolates: Chocolate[];
 }
 
 export const CommunityView: React.FC<Props> = ({ chocolates }) => {
+  usePageMeta('Community', 'Scopri i degustatori più attivi e le tavolette più apprezzate dalla community.');
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<CommunityProfile[]>([]);
@@ -20,8 +22,10 @@ export const CommunityView: React.FC<Props> = ({ chocolates }) => {
   const [selectedUser, setSelectedUser] = useState<CommunityProfile | null>(null);
   const [selectedUserRatings, setSelectedUserRatings] = useState<any[]>([]);
   const [loadingRatings, setLoadingRatings] = useState(false);
+  const [activeUsers, setActiveUsers] = useState<(CommunityProfile & { ratingCount: number })[]>([]);
+  const [loadingActive, setLoadingActive] = useState(true);
 
-  useEffect(() => { fetchTopRated(); }, [chocolates]);
+  useEffect(() => { fetchTopRated(); fetchActive(); }, [chocolates]);
 
   const fetchTopRated = async () => {
     try {
@@ -48,6 +52,14 @@ export const CommunityView: React.FC<Props> = ({ chocolates }) => {
     } finally {
       setLoadingTop(false);
     }
+  };
+
+  const fetchActive = async () => {
+    try {
+      setLoadingActive(true);
+      setActiveUsers(await profileService.fetchActive(6));
+    } catch (e) { console.error('[Community] fetchActive error:', e); }
+    finally { setLoadingActive(false); }
   };
 
   const handleSearch = async (e: React.FormEvent) => {
@@ -78,6 +90,42 @@ export const CommunityView: React.FC<Props> = ({ chocolates }) => {
         <p className="text-on-surface-variant max-w-2xl mx-auto text-lg">
           Scopri altri degustatori, esplora le loro collezioni private e scopri cosa ne pensa la community.
         </p>
+      </section>
+
+      {/* Degustatori Attivi */}
+      <section>
+        <div className="flex items-center gap-3 mb-6">
+          <Activity size={18} className="text-secondary" />
+          <h2 className="text-xl font-bold text-primary">Degustatori Attivi</h2>
+        </div>
+        {loadingActive ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="animate-pulse bg-white border border-stone-100 rounded-2xl p-4 flex flex-col items-center gap-3">
+                <div className="w-14 h-14 rounded-xl bg-stone-100" />
+                <div className="h-3 bg-stone-100 rounded w-3/4" />
+                <div className="h-2 bg-stone-100 rounded w-1/2" />
+              </div>
+            ))}
+          </div>
+        ) : activeUsers.length > 0 ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+            {activeUsers.map(u => (
+              <button key={u.id} onClick={() => openProfile(u)}
+                className="group bg-white border border-stone-100 hover:border-secondary/30 hover:shadow-lg rounded-2xl p-4 flex flex-col items-center gap-2 transition-all text-center">
+                <div className="w-14 h-14 rounded-xl overflow-hidden bg-stone-100 shrink-0">
+                  {u.avatar_url
+                    ? <img src={u.avatar_url} className="w-full h-full object-cover" alt={u.username || ''} />
+                    : <div className="w-full h-full flex items-center justify-center text-xl font-serif italic text-stone-400">{u.username?.[0]?.toUpperCase() || 'U'}</div>}
+                </div>
+                <span className="text-xs font-bold text-primary truncate w-full">{u.name || u.username}</span>
+                <span className="text-[10px] text-secondary font-black">{u.ratingCount} rec.</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <p className="text-stone-400 italic text-sm">Nessun degustatore attivo trovato.</p>
+        )}
       </section>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">

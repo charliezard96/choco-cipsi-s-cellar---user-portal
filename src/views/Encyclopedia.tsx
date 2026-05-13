@@ -2,7 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chocolate } from '../types';
 import { ChocolateCard } from '../components/ChocolateCard';
-import { Search, Loader2 } from 'lucide-react';
+import { SkeletonCard } from '../components/SkeletonCard';
+import { Search } from 'lucide-react';
+import { usePageMeta } from '../hooks/usePageMeta';
 
 const PAGE_SIZE = 24;
 
@@ -12,6 +14,7 @@ interface Props {
 }
 
 export const EncyclopediaView: React.FC<Props> = ({ chocolates, loading }) => {
+  usePageMeta('Enciclopedia', 'Scopri e confronta le migliori tavolette di cioccolato fondente del mondo.');
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [selectedOrigin, setSelectedOrigin] = useState('All');
@@ -93,11 +96,7 @@ export const EncyclopediaView: React.FC<Props> = ({ chocolates, loading }) => {
 
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-12">
         {loading ? (
-          Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="aspect-[4/5] bg-surface-container animate-pulse border border-primary/5 rounded-lg flex items-center justify-center">
-              <Loader2 className="animate-spin text-primary/20 w-8 h-8" />
-            </div>
-          ))
+          Array.from({ length: 24 }).map((_, i) => <SkeletonCard key={i} />)
         ) : (
           paginated.map(choco => (
             <ChocolateCard key={choco.id} chocolate={choco} onClick={(id) => navigate(`/chocolate/${id}`)} />

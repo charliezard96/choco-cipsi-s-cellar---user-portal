@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { GitCompare } from 'lucide-react';
 import { Chocolate } from '../types';
 import { useCompare } from '../contexts/CompareContext';
+import { prefetchChocolateDetail } from '../utils/prefetch';
 
 interface CardProps {
   chocolate: Chocolate;
@@ -15,6 +16,7 @@ export const ChocolateCard: React.FC<CardProps> = ({ chocolate, onClick }) => {
   return (
   <div
     onClick={() => onClick(chocolate.id)}
+    onMouseEnter={() => prefetchChocolateDetail(chocolate.id)}
     className="ivory-card group cursor-pointer hover:shadow-xl hover:-translate-y-1"
     role="button"
     tabIndex={0}

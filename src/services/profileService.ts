@@ -68,4 +68,26 @@ export const profileService = {
     if (error) throw error;
     return data || [];
   },
+
+  /** Utenti più attivi: profili con più valutazioni */
+  async fetchActive(limit = 6): Promise<(CommunityProfile & { ratingCount: number })[]> {
+    const { data: ratings, error: rErr } = await supabase
+      .from('user_ratings')
+      .select('user_id');
+    if (rErr) throw rErr;
+
+    const counts: Record<string, number> = {};
+    (ratings || []).forEach(r => { counts[r.user_id] = (counts[r.user_id] || 0) + 1; });
+    const topIds = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, limit).map(([id]) => id);
+    if (topIds.length === 0) return [];
+
+    const { data: profiles, error: pErr } = await supabase
+      .from('profiles')
+      .select('*')
+      .in('id', topIds);
+    if (pErr) throw pErr;
+
+    return (profiles || []).map(p => ({ ...p, ratingCount: counts[p.id] || 0 }))
+      .sort((a, b) => b.ratingCount - a.ratingCount);
+  },
 };

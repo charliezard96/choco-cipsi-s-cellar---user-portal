@@ -18,6 +18,7 @@ import { CompareFloatingBar } from './components/CompareFloatingBar';
 import { CompareView } from './views/CompareView';
 import { SearchProvider } from './contexts/SearchContext';
 import { CompareProvider } from './contexts/CompareContext';
+import { ToastProvider } from './contexts/ToastContext';
 import { supabase } from './lib/supabase';
 import { useChocolates } from './hooks/useChocolates';
 import { useProducers } from './hooks/useProducers';
@@ -42,6 +43,7 @@ export default function App() {
   }, [location.pathname]);
 
   return (
+    <ToastProvider>
     <SearchProvider>
     <CompareProvider>
     <div className="min-h-screen bg-surface flex flex-col font-sans selection:bg-secondary-container selection:text-on-secondary-container">
@@ -98,5 +100,6 @@ export default function App() {
     </div>
     </CompareProvider>
     </SearchProvider>
+    </ToastProvider>
   );
 }

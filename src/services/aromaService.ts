@@ -1,20 +1,29 @@
 import { supabase } from '../lib/supabase';
 import { AromaProfile, BarLevelTag, NoteVote } from '../types';
 
+let profilesCache: Promise<AromaProfile[]> | null = null;
+const barTagsCache = new Map<string, Promise<BarLevelTag[]>>();
+
 export const aromaService = {
-  async fetchProfiles(): Promise<AromaProfile[]> {
-    const { data, error } = await supabase.from('aroma_profiles').select('*');
-    if (error) throw error;
-    return data || [];
+  fetchProfiles(): Promise<AromaProfile[]> {
+    if (!profilesCache) {
+      profilesCache = Promise.resolve(supabase.from('aroma_profiles').select('*')).then(({ data, error }) => {
+        if (error) { profilesCache = null; throw error; }
+        return (data || []) as AromaProfile[];
+      });
+    }
+    return profilesCache;
   },
 
-  async fetchBarLevelTags(chocolateId: string): Promise<BarLevelTag[]> {
-    const { data, error } = await supabase
-      .from('bar_level_tags')
-      .select('bar_id, group_name, subgroup_name')
-      .eq('bar_id', chocolateId);
-    if (error) throw error;
-    return (data || []) as BarLevelTag[];
+  fetchBarLevelTags(chocolateId: string): Promise<BarLevelTag[]> {
+    if (!barTagsCache.has(chocolateId)) {
+      const p = Promise.resolve(supabase.from('bar_level_tags').select('bar_id, group_name, subgroup_name').eq('bar_id', chocolateId)).then(({ data, error }) => {
+        if (error) { barTagsCache.delete(chocolateId); throw error; }
+        return (data || []) as BarLevelTag[];
+      });
+      barTagsCache.set(chocolateId, p);
+    }
+    return barTagsCache.get(chocolateId)!;
   },
 
   async fetchOfficialNotes(chocolateId: string): Promise<string[]> {
@@ -62,6 +71,7 @@ export const aromaService = {
         .insert({ chocolate_id: chocolateId, aroma_id: aromaId, user_id: userId });
       if (error) throw error;
     }
+    barTagsCache.delete(chocolateId);
   },
 
   async fetchAromaStats(chocolateId: string) {
