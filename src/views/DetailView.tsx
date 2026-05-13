@@ -39,22 +39,24 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
     aromaProfiles, officialNotes, barLevelTags, noteVotes,
     userRating, avgRating, totalRatings,
     refreshTrigger, handleRate, handleToggleVote,
-  } = useChocolateDetail(id || '', user?.id);
+  } = useChocolateDetail(chocolate?.id || id || '', user?.id);
+
+  const numericId = chocolate ? Number(chocolate.id) : NaN;
 
   useEffect(() => {
-    if (!user || !id) return;
+    if (!user || isNaN(numericId)) return;
     cellarService.fetchUserNotes(user.id).then(notes => {
-      const n = notes.find(n => n.bar_id === Number(id));
+      const n = notes.find(n => n.bar_id === numericId);
       setPersonalNote(n?.note || '');
       setNoteDraft(n?.note || '');
     }).catch(console.error);
-  }, [user, id]);
+  }, [user, numericId]);
 
   const handleSaveNote = async () => {
-    if (!user || !id) return;
+    if (!user || isNaN(numericId)) return;
     setSavingNote(true);
     try {
-      await cellarService.saveNote(user.id, Number(id), noteDraft);
+      await cellarService.saveNote(user.id, numericId, noteDraft);
       setPersonalNote(noteDraft);
       setEditingNote(false);
     } catch (err) { console.error(err); }
