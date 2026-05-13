@@ -89,7 +89,7 @@ export const CompareView: React.FC<Props> = ({ chocolates }) => {
   if (!a || !b) return (
     <div className="text-center py-20">
       <p className="text-stone-400 text-sm font-medium">Tavolette non trovate.</p>
-      <button onClick={() => navigate('/')} className="mt-4 text-xs font-bold text-secondary uppercase tracking-widest">
+      <button onClick={() => navigate('/encyclopedia')} className="mt-4 text-xs font-bold text-secondary uppercase tracking-widest">
         Torna all'enciclopedia
       </button>
     </div>

@@ -194,7 +194,7 @@ export const MyCellarView: React.FC<Props> = ({ chocolates }) => {
             ))}
           </div>
           <div className="text-center">
-            <button onClick={() => navigate('/')}
+            <button onClick={() => navigate('/encyclopedia')}
               className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-full text-xs font-bold uppercase tracking-widest hover:shadow-lg transition-all">
               <ArrowRight size={14} /> Inizia dall'enciclopedia
             </button>

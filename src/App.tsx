@@ -3,6 +3,7 @@ import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { EncyclopediaView } from './views/Encyclopedia';
+import { HomeView } from './views/HomeView';
 import { DetailView } from './views/DetailView';
 import { ProducersView } from './views/Producers';
 import { ProducerDetailView } from './views/ProducerDetailView';
@@ -59,9 +60,12 @@ export default function App() {
         </div>
       )}
 
-      <main className="flex-grow max-w-7xl mx-auto px-8 py-12 w-full">
+      <main className={`flex-grow w-full ${location.pathname === '/' ? '' : 'max-w-7xl mx-auto px-8 py-12'}`}>
         <Routes>
           <Route path="/" element={
+            <HomeView chocolates={chocolates} producers={producers} />
+          } />
+          <Route path="/encyclopedia" element={
             <EncyclopediaView chocolates={chocolates} loading={chocoLoading} />
           } />
           <Route path="/chocolate/:id" element={
@@ -89,7 +93,7 @@ export default function App() {
           } />
           <Route path="/auth-callback" element={<AuthCallback />} />
           {/* Fallback: redirect to home */}
-          <Route path="*" element={<EncyclopediaView chocolates={chocolates} loading={chocoLoading} />} />
+          <Route path="*" element={<HomeView chocolates={chocolates} producers={producers} />} />
         </Routes>
       </main>
 

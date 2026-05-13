@@ -7,7 +7,7 @@ import { useSearch } from '../contexts/SearchContext';
 import { supabase } from '../lib/supabase';
 
 const BASE_NAV_ITEMS = [
-  { path: '/', label: 'Enciclopedia', matchPaths: ['/', '/chocolate'] },
+  { path: '/encyclopedia', label: 'Enciclopedia', matchPaths: ['/encyclopedia', '/chocolate'] },
   { path: '/producers', label: 'Produttori', matchPaths: ['/producers'] },
   { path: '/tastings', label: 'Degustazioni', matchPaths: ['/tastings'], requiresTastings: true },
   { path: '/community', label: 'Community', matchPaths: ['/community'] },
@@ -27,7 +27,7 @@ export const Header: React.FC = () => {
   ];
 
   const isActive = (item: typeof BASE_NAV_ITEMS[0]) =>
-    item.matchPaths.some(p => p === '/' ? location.pathname === '/' : location.pathname.startsWith(p));
+    item.matchPaths.some(p => location.pathname.startsWith(p));
 
   const NavLink: React.FC<{ item: typeof BASE_NAV_ITEMS[0] }> = ({ item }) => (
     <Link to={item.path} onClick={() => setMobileOpen(false)}

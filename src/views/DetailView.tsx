@@ -90,7 +90,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
     return (
       <div className="text-center py-20">
         <p className="text-on-surface-variant">Tavoletta non trovata.</p>
-        <button onClick={() => navigate('/')} className="mt-4 text-secondary font-bold text-xs uppercase tracking-widest underline">Torna all'archivio</button>
+        <button onClick={() => navigate('/encyclopedia')} className="mt-4 text-secondary font-bold text-xs uppercase tracking-widest underline">Torna all'archivio</button>
       </div>
     );
   }
@@ -119,7 +119,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
 
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
-      <button onClick={() => navigate('/')} className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors mb-8 text-xs font-bold uppercase tracking-widest">
+      <button onClick={() => navigate('/encyclopedia')} className="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors mb-8 text-xs font-bold uppercase tracking-widest">
         <ArrowLeft size={16} /> Torna alla Libreria
       </button>
 
