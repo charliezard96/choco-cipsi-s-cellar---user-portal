@@ -183,7 +183,7 @@ export const CommunityView: React.FC<Props> = ({ chocolates }) => {
                   ))
                 ) : topChocolates.length > 0 ? (
                   topChocolates.map((choco, i) => (
-                    <button key={choco.id} onClick={() => navigate(`/chocolate/${choco.id}`)} className="w-full flex items-center gap-4 group text-left">
+                    <button key={choco.id} onClick={() => navigate(`/chocolate/${choco.slug}`)} className="w-full flex items-center gap-4 group text-left">
                       <div className="relative shrink-0">
                         <div className="absolute -left-2 -top-2 w-6 h-6 bg-secondary text-primary font-black text-[10px] flex items-center justify-center rounded-full z-10 shadow-lg">#{i + 1}</div>
                         <img src={choco.imageUrl} className="w-16 h-16 rounded-xl object-cover shadow-lg border border-white/10 group-hover:scale-105 transition-transform" alt="" />
@@ -246,7 +246,7 @@ export const CommunityView: React.FC<Props> = ({ chocolates }) => {
                         const choco = chocolates.find(c => c.id === String(rating.chocolate_id));
                         if (!choco) return null;
                         return (
-                          <button key={rating.id} onClick={() => { navigate(`/chocolate/${choco.id}`); setSelectedUser(null); }}
+                          <button key={rating.id} onClick={() => { navigate(`/chocolate/${choco.slug}`); setSelectedUser(null); }}
                             className="bg-stone-50 border border-stone-100 p-3 rounded-2xl flex items-center gap-4 hover:border-secondary/30 transition-all hover:bg-white hover:shadow-sm text-left group">
                             <img src={choco.imageUrl} className="w-12 h-12 rounded-lg object-cover" alt="" />
                             <div className="flex-1 min-w-0">

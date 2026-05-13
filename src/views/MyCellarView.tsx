@@ -224,7 +224,7 @@ export const MyCellarView: React.FC<Props> = ({ chocolates }) => {
               className="bg-white border border-stone-100 rounded-3xl p-5 shadow-sm hover:border-secondary/20 transition-all">
               <div className="flex gap-4">
                 {/* Thumbnail */}
-                <button onClick={() => navigate(`/chocolate/${entry.chocolateId}`)} className="shrink-0">
+                <button onClick={() => navigate(`/chocolate/${choco.slug}`)} className="shrink-0">
                   <img src={choco.imageUrl} alt={choco.name}
                     className="w-20 h-20 rounded-2xl object-cover bg-stone-100 hover:scale-105 transition-transform shadow-sm" />
                 </button>
@@ -286,7 +286,7 @@ export const MyCellarView: React.FC<Props> = ({ chocolates }) => {
                     </button>
                     <span className="text-stone-200">·</span>
                     <button
-                      onClick={() => navigate(`/chocolate/${entry.chocolateId}`)}
+                      onClick={() => navigate(`/chocolate/${choco.slug}`)}
                       className="flex items-center gap-1 text-[10px] font-bold text-stone-400 hover:text-primary transition-colors uppercase tracking-widest">
                       Scheda <ArrowRight size={11} />
                     </button>

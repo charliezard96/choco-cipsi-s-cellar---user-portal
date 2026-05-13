@@ -2,6 +2,7 @@
 
 export interface Chocolate {
   id: string;
+  slug: string;
   name: string;
   percentage: string;
   origin: string;

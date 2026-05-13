@@ -117,7 +117,7 @@ export const CompareView: React.FC<Props> = ({ chocolates }) => {
       {/* Hero images */}
       <div className="grid grid-cols-2 gap-6 mb-12">
         {[a, b].map(bar => (
-          <button key={bar.id} onClick={() => navigate(`/chocolate/${bar.id}`)} className="group text-left">
+          <button key={bar.id} onClick={() => navigate(`/chocolate/${bar.slug}`)} className="group text-left">
             <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-stone-50 mb-3">
               <img src={bar.imageUrl} alt={bar.name}
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />

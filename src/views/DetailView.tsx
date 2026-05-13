@@ -26,7 +26,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
   const navigate = useNavigate();
   const { user, setShowAuthModal } = useAuth();
   const { addToast } = useToast();
-  const chocolate = chocolates.find(c => c.id === id);
+  const chocolate = chocolates.find(c => c.slug === id || c.id === id);
   usePageMeta(chocolate ? `${chocolate.name} — ${chocolate.producer}` : undefined, chocolate ? `Scheda tecnica e profilo aromatico di ${chocolate.name} di ${chocolate.producer}, origine ${chocolate.origin}.` : undefined);
   const [hoverRating, setHoverRating] = useState(0);
   const [savingRating, setSavingRating] = useState(false);
@@ -415,7 +415,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
               {recs.map(rec => (
-                <button key={rec.id} onClick={() => navigate(`/chocolate/${rec.id}`)}
+                <button key={rec.id} onClick={() => navigate(`/chocolate/${rec.slug}`)}
                   className="group text-left bg-white border border-stone-100 rounded-2xl overflow-hidden hover:border-secondary/20 hover:shadow-md transition-all">
                   <div className="aspect-[3/4] bg-stone-50 overflow-hidden relative">
                     <img src={rec.imageUrl} alt={rec.name}

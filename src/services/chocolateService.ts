@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase';
 import { Chocolate } from '../types';
+import { slugify } from '../utils/slugify';
 
 const FALLBACK_IMG = 'https://images.unsplash.com/photo-1599599810769-bcde5a160d32?q=80&w=800&auto=format&fit=crop';
 const FALLBACK_BAR_IMG = 'https://images.unsplash.com/photo-1606312619070-d48b4c652a52?q=80&w=800&auto=format&fit=crop';
@@ -23,9 +24,12 @@ export const chocolateService = {
         ?.map((rel: any) => rel.aroma_profiles?.name)
         .filter(Boolean) || [];
 
+      const name = (item.name || 'Senza Nome').trim();
+      const brand = (item.brand || 'Produttore Ignoto').trim();
       return {
         id: String(item.id),
-        name: item.name || 'Senza Nome',
+        slug: slugify(name, brand),
+        name,
         percentage: item.percentage ? `${item.percentage}%` : '0%',
         origin: item.origin || 'Origine Sconosciuta',
         tastingNotes: relationNotes.length > 0

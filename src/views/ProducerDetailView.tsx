@@ -102,7 +102,7 @@ export const ProducerDetailView: React.FC<Props> = ({ producers, chocolates }) =
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {brandBars.map(c => (
-              <div key={c.id} onClick={() => navigate(`/chocolate/${c.id}`)} className="cursor-pointer group flex flex-col h-full">
+              <div key={c.id} onClick={() => navigate(`/chocolate/${c.slug}`)} className="cursor-pointer group flex flex-col h-full">
                 <div className="aspect-[4/5] bg-surface-container mb-4 overflow-hidden relative">
                   <img src={c.imageUrl} className="w-full h-full object-cover grayscale-[20%] group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" alt={c.name} loading="lazy" />
                   <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/5 transition-colors" />

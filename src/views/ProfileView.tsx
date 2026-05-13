@@ -132,7 +132,7 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
                   <div className="space-y-3">
                     {paginatedRatings.map(r => (
                       <motion.button key={r.id} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}
-                        onClick={() => { setIsModalOpen(false); navigate(`/chocolate/${r.chocolateDetails.id}`); }}
+                        onClick={() => { setIsModalOpen(false); navigate(`/chocolate/${r.chocolateDetails.slug}`); }}
                         className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-surface-container border border-transparent hover:border-primary/5 transition-all text-left">
                         <img src={r.chocolateDetails.imageUrl} className="w-16 h-16 rounded-xl object-cover shadow-sm bg-stone-100" alt={r.chocolateDetails.name} />
                         <div className="flex-1 min-w-0">
@@ -247,7 +247,7 @@ export const ProfileView: React.FC<Props> = ({ chocolates }) => {
               const choco = chocolates.find(c => c.id === chocId);
               return (
                 <div key={chocId} className="space-y-4 p-6 bg-stone-50/50 rounded-2xl border border-stone-100 group hover:border-secondary/20 transition-all">
-                  <button onClick={() => navigate(`/chocolate/${chocId}`)} className="text-left w-full">
+                  <button onClick={() => navigate(`/chocolate/${choco?.slug ?? chocId}`)} className="text-left w-full">
                     <div className="flex items-center gap-3 mb-2">
                       {choco?.imageUrl && <img src={choco.imageUrl} className="w-10 h-10 rounded-lg object-cover shadow-sm bg-white" alt="" />}
                       <div>

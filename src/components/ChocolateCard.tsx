@@ -15,12 +15,12 @@ export const ChocolateCard: React.FC<CardProps> = ({ chocolate, onClick }) => {
   const inCompare = isInCompare(chocolate.id);
   return (
   <div
-    onClick={() => onClick(chocolate.id)}
+    onClick={() => onClick(chocolate.slug)}
     onMouseEnter={() => prefetchChocolateDetail(chocolate.id)}
     className="ivory-card group cursor-pointer hover:shadow-xl hover:-translate-y-1"
     role="button"
     tabIndex={0}
-    onKeyDown={e => e.key === 'Enter' && onClick(chocolate.id)}
+    onKeyDown={e => e.key === 'Enter' && onClick(chocolate.slug)}
     aria-label={`${chocolate.name} — ${chocolate.producer}`}
   >
     <div className="aspect-[4/5] bg-surface-container overflow-hidden relative">

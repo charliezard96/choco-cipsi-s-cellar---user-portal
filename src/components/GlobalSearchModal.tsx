@@ -82,7 +82,7 @@ export const GlobalSearchModal: React.FC<Props> = ({ chocolates, producers }) =>
                     <div className="mb-4">
                       <p className="text-[9px] font-black text-stone-300 uppercase tracking-widest px-3 mb-2">Tavolette</p>
                       {matchedChocolates.map(c => (
-                        <button key={c.id} onClick={() => go(`/chocolate/${c.id}`)}
+                        <button key={c.id} onClick={() => go(`/chocolate/${c.slug}`)}
                           className="w-full flex items-center gap-3 p-3 rounded-2xl hover:bg-stone-50 transition-colors text-left group">
                           <img src={c.imageUrl} alt={c.name} className="w-10 h-10 rounded-xl object-cover bg-stone-100 shrink-0" />
                           <div className="flex-1 min-w-0">
