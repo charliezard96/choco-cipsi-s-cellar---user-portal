@@ -4,7 +4,8 @@ import { Chocolate, Producer } from '../types';
 import { getIconHelper } from '../utils/iconUtils';
 import { getAromaColors } from '../utils/colorUtils';
 import { findProducerForChocolate } from '../utils/matchUtils';
-import { BookOpen, Verified, ArrowLeft, Star, LogIn, RefreshCw, Fingerprint, Sparkles } from 'lucide-react';
+import { BookOpen, Verified, ArrowLeft, Star, LogIn, RefreshCw, Fingerprint, Sparkles, NotebookPen, Check } from 'lucide-react';
+import { cellarService } from '../services/cellarService';
 import { useAuth } from '../contexts/AuthContext';
 import { AromaVoting } from '../components/AromaVoting';
 import { ChocolateSensoryProfile } from '../components/ChocolateSensoryProfile';
@@ -25,6 +26,10 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
   const [hoverRating, setHoverRating] = useState(0);
   const [savingRating, setSavingRating] = useState(false);
   const [statusMsg, setStatusMsg] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [personalNote, setPersonalNote] = useState('');
+  const [noteDraft, setNoteDraft] = useState('');
+  const [editingNote, setEditingNote] = useState(false);
+  const [savingNote, setSavingNote] = useState(false);
 
   const chocolate = chocolates.find(c => c.id === id);
 
@@ -39,6 +44,26 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
     const t = setTimeout(() => setStatusMsg(null), 3000);
     return () => clearTimeout(t);
   }, [statusMsg]);
+
+  useEffect(() => {
+    if (!user || !id) return;
+    cellarService.fetchUserNotes(user.id).then(notes => {
+      const n = notes.find(n => n.bar_id === Number(id));
+      setPersonalNote(n?.note || '');
+      setNoteDraft(n?.note || '');
+    }).catch(console.error);
+  }, [user, id]);
+
+  const handleSaveNote = async () => {
+    if (!user || !id) return;
+    setSavingNote(true);
+    try {
+      await cellarService.saveNote(user.id, Number(id), noteDraft);
+      setPersonalNote(noteDraft);
+      setEditingNote(false);
+    } catch (err) { console.error(err); }
+    finally { setSavingNote(false); }
+  };
 
   // Must be before early returns to satisfy Rules of Hooks
   const groupedTags = useMemo(() => {
@@ -250,6 +275,52 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
           </div>
         )}
       </div>
+
+      {/* Nota Personale */}
+      {user && (
+        <div className="py-10 border-b border-primary/10">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-[10px] font-bold text-on-surface-variant/50 tracking-widest uppercase flex items-center gap-2">
+              <NotebookPen size={14} className="text-secondary" /> La Tua Nota Privata
+            </h3>
+            {!editingNote && (
+              <button onClick={() => { setNoteDraft(personalNote); setEditingNote(true); }}
+                className="text-[10px] font-bold text-secondary uppercase tracking-widest hover:opacity-70 transition-opacity">
+                {personalNote ? 'Modifica' : '+ Aggiungi nota'}
+              </button>
+            )}
+          </div>
+          {editingNote ? (
+            <div className="space-y-3">
+              <textarea
+                rows={4}
+                value={noteDraft}
+                onChange={e => setNoteDraft(e.target.value)}
+                placeholder="Le tue impressioni, abbinamenti, momenti... Solo tu la vedi."
+                className="w-full bg-stone-50 border border-stone-200 rounded-2xl px-4 py-3 text-sm focus:ring-2 focus:ring-secondary/20 focus:border-secondary outline-none transition-all resize-none font-medium"
+                autoFocus
+              />
+              <div className="flex gap-3">
+                <button onClick={() => setEditingNote(false)}
+                  className="px-4 py-2 rounded-xl border border-stone-200 text-xs font-bold text-stone-500 hover:bg-stone-50 transition-colors uppercase tracking-widest">
+                  Annulla
+                </button>
+                <button onClick={handleSaveNote} disabled={savingNote}
+                  className="flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-on-primary text-xs font-bold uppercase tracking-widest hover:shadow-lg transition-all disabled:opacity-50">
+                  {savingNote ? <RefreshCw size={13} className="animate-spin" /> : <Check size={13} />}
+                  Salva
+                </button>
+              </div>
+            </div>
+          ) : personalNote ? (
+            <p className="text-sm text-stone-600 italic leading-relaxed bg-stone-50/60 border border-stone-100 rounded-2xl px-5 py-4">
+              "{personalNote}"
+            </p>
+          ) : (
+            <p className="text-xs text-stone-300 italic">Nessuna nota ancora. Aggiungi le tue impressioni personali.</p>
+          )}
+        </div>
+      )}
 
       {/* Flavor Wheel */}
       <div className="mt-10 md:mt-20 py-10 md:py-20 border-y border-primary/5 bg-stone-50/30 overflow-hidden relative">
