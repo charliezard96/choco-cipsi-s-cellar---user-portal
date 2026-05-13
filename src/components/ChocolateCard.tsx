@@ -24,7 +24,7 @@ export const ChocolateCard: React.FC<CardProps> = ({ chocolate, onClick }) => {
     <div className="aspect-[4/5] bg-surface-container overflow-hidden relative">
       <button
         onClick={e => { e.stopPropagation(); toggleCompare(chocolate.id); }}
-        className={`absolute top-2 right-2 z-10 p-1.5 rounded-full shadow-md transition-all ${inCompare ? 'bg-secondary text-primary opacity-100' : 'bg-white text-secondary opacity-0 group-hover:opacity-100 hover:bg-secondary hover:text-primary'}`}
+        className={`absolute top-2 right-2 z-10 p-1.5 rounded-full shadow-md transition-all ${inCompare ? 'bg-secondary text-primary' : 'bg-white text-secondary sm:opacity-0 sm:group-hover:opacity-100 hover:bg-secondary hover:text-primary'}`}
         aria-label="Confronta">
         <GitCompare size={12} />
       </button>
