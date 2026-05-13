@@ -90,7 +90,7 @@ export const OriginMap: React.FC<Props> = ({ origin, className = '' }) => {
         className={`w-full transition-opacity duration-500 ${loaded ? 'opacity-100' : 'opacity-0'}`}
       />
       <div className="absolute bottom-2 right-3">
-        <span className="text-[8px] font-black uppercase tracking-widest text-stone-300">{origin}</span>
+        <span className="text-[8px] font-black uppercase tracking-widest text-stone-500">{origin}</span>
       </div>
     </div>
   );

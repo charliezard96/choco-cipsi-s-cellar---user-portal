@@ -164,7 +164,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
       </div>
 
       {/* Mappa origine */}
-      <OriginMap origin={chocolate.origin} className="mb-12 max-h-52" />
+      <OriginMap origin={chocolate.origin} className="mb-12 max-w-2xl mx-auto" />
 
       {/* Profilo Aromatico d'Archivio — card per famiglia */}
       <div className="py-12 border-b border-primary/10">
