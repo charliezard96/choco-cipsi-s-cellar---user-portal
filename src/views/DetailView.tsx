@@ -4,7 +4,7 @@ import { Chocolate, Producer } from '../types';
 import { getIconHelper } from '../utils/iconUtils';
 import { getAromaColors } from '../utils/colorUtils';
 import { findProducerForChocolate } from '../utils/matchUtils';
-import { BookOpen, Verified, ArrowLeft, Star, LogIn, RefreshCw, Fingerprint } from 'lucide-react';
+import { BookOpen, Verified, ArrowLeft, Star, LogIn, RefreshCw, Fingerprint, Sparkles } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { AromaVoting } from '../components/AromaVoting';
 import { ChocolateSensoryProfile } from '../components/ChocolateSensoryProfile';
@@ -322,6 +322,46 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
           </div>
         </div>
       </div>
+
+      {/* Raccomandazioni */}
+      {(() => {
+        const recs = chocolates
+          .filter(c => c.id !== chocolate.id)
+          .map(c => ({
+            c,
+            score: c.tastingNotes.filter(n => chocolate.tastingNotes.includes(n)).length
+              + (c.origin === chocolate.origin ? 0.5 : 0),
+          }))
+          .filter(({ score }) => score >= 1)
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 4)
+          .map(({ c }) => c);
+        if (recs.length === 0) return null;
+        return (
+          <div className="mt-20">
+            <div className="flex items-center gap-2 mb-8">
+              <Sparkles size={18} className="text-secondary" />
+              <h3 className="text-[10px] font-black text-primary uppercase tracking-[0.3em]">Ti Potrebbe Piacere</h3>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {recs.map(rec => (
+                <button key={rec.id} onClick={() => navigate(`/chocolate/${rec.id}`)}
+                  className="group text-left bg-white border border-stone-100 rounded-2xl overflow-hidden hover:border-secondary/20 hover:shadow-md transition-all">
+                  <div className="aspect-[3/4] bg-stone-50 overflow-hidden relative">
+                    <img src={rec.imageUrl} alt={rec.name}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+                  </div>
+                  <div className="p-3">
+                    <span className="text-[9px] font-black text-secondary uppercase tracking-widest block">{rec.producer}</span>
+                    <span className="text-xs font-bold text-primary leading-tight block truncate">{rec.name}</span>
+                    <span className="text-[9px] text-stone-400 italic">{rec.origin}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 };

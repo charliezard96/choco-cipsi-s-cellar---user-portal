@@ -169,18 +169,42 @@ export const MyCellarView: React.FC<Props> = ({ chocolates }) => {
         </div>
       </div>
 
-      {/* Empty state */}
-      {filtered.length === 0 && (
-        <div className="py-24 text-center border border-dashed border-stone-200 rounded-3xl">
-          <Fingerprint size={48} className="mx-auto text-stone-100 mb-4" />
-          <p className="text-sm font-bold text-stone-400 uppercase tracking-widest">
-            {search ? 'Nessuna tavoletta trovata' : 'La tua cantina è vuota'}
-          </p>
-          {!search && (
-            <button onClick={() => navigate('/')} className="mt-4 text-xs font-bold text-secondary uppercase tracking-widest hover:opacity-70 transition-opacity">
-              Esplora l'enciclopedia →
+      {/* Empty state — onboarding per nuovi utenti */}
+      {filtered.length === 0 && !search && entries.length === 0 && (
+        <div className="py-12 border border-dashed border-stone-200 rounded-3xl px-8">
+          <div className="max-w-lg mx-auto text-center mb-10">
+            <Fingerprint size={40} className="mx-auto text-secondary/30 mb-4" />
+            <h2 className="text-lg font-bold text-primary mb-2">La tua cantina è ancora vuota</h2>
+            <p className="text-xs text-stone-400 font-medium">Inizia a costruire il tuo archivio personale seguendo questi tre passi.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-10">
+            {[
+              { step: '01', icon: Search, title: 'Esplora', desc: 'Sfoglia l\'enciclopedia e scopri le tavolette che ti incuriosiscono.' },
+              { step: '02', icon: Fingerprint, title: 'Vota le note', desc: 'Apri una scheda e vota i profili aromatici che percepisci.' },
+              { step: '03', icon: Star, title: 'Assegna stelle', desc: 'Dai una valutazione a ciò che hai assaggiato.' },
+            ].map(({ step, icon: Icon, title, desc }) => (
+              <div key={step} className="text-center p-6 bg-stone-50/80 rounded-2xl border border-stone-100">
+                <span className="text-[9px] font-black text-secondary/50 uppercase tracking-widest block mb-3">{step}</span>
+                <Icon size={22} className="mx-auto text-secondary mb-3" />
+                <h3 className="text-xs font-black text-primary uppercase tracking-widest mb-2">{title}</h3>
+                <p className="text-[11px] text-stone-400 leading-relaxed">{desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="text-center">
+            <button onClick={() => navigate('/')}
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-on-primary rounded-full text-xs font-bold uppercase tracking-widest hover:shadow-lg transition-all">
+              <ArrowRight size={14} /> Inizia dall'enciclopedia
             </button>
-          )}
+          </div>
+        </div>
+      )}
+
+      {/* Empty state — ricerca senza risultati */}
+      {filtered.length === 0 && search && (
+        <div className="py-16 text-center border border-dashed border-stone-200 rounded-3xl">
+          <Fingerprint size={40} className="mx-auto text-stone-100 mb-4" />
+          <p className="text-sm font-bold text-stone-400 uppercase tracking-widest">Nessuna tavoletta trovata</p>
         </div>
       )}
 

@@ -5,6 +5,7 @@ import { aromaService } from '../services/aromaService';
 import { getIconHelper } from '../utils/iconUtils';
 import { ensureVisible } from '../utils/colorUtils';
 import { RefreshCw, Radar, Info } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 /* ── Types ── */
 interface Props {
@@ -99,6 +100,19 @@ export const ChocolateFlavorWheel: React.FC<Props> = ({ chocolateId, profiles, r
   };
 
   useEffect(() => { fetchStats(); }, [chocolateId, refreshTrigger, profiles]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`flavor-wheel-${chocolateId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'aroma_votes',
+        filter: `chocolate_id=eq.${chocolateId}`,
+      }, () => { fetchStats(); })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [chocolateId]);
 
   const { innerData, midData, outerData, hasData } = useMemo(() => {
     if (stats.length === 0) return { innerData: [], midData: [], outerData: [], hasData: false };

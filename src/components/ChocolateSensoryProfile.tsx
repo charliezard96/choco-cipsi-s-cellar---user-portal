@@ -4,6 +4,7 @@ import { AromaProfile } from '../types';
 import { aromaService } from '../services/aromaService';
 import { getIconHelper } from '../utils/iconUtils';
 import { getAromaColors } from '../utils/colorUtils';
+import { supabase } from '../lib/supabase';
 
 interface Props {
   chocolateId: string;
@@ -60,6 +61,19 @@ export const ChocolateSensoryProfile: React.FC<Props> = ({ chocolateId, userId, 
   };
 
   useEffect(() => { fetchData(); }, [chocolateId, userId, refreshTrigger]);
+
+  useEffect(() => {
+    const channel = supabase
+      .channel(`sensory-profile-${chocolateId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'aroma_votes',
+        filter: `chocolate_id=eq.${chocolateId}`,
+      }, () => { fetchData(); })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [chocolateId]);
 
   const userFamilies = useMemo(() =>
     groupByFamily(

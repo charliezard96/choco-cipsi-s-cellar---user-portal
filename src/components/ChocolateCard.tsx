@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { GitCompare } from 'lucide-react';
 import { Chocolate } from '../types';
+import { useCompare } from '../contexts/CompareContext';
 
 interface CardProps {
   chocolate: Chocolate;
   onClick: (id: string) => void;
 }
 
-export const ChocolateCard: React.FC<CardProps> = ({ chocolate, onClick }) => (
+export const ChocolateCard: React.FC<CardProps> = ({ chocolate, onClick }) => {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const { toggleCompare, isInCompare } = useCompare();
+  const inCompare = isInCompare(chocolate.id);
+  return (
   <div
     onClick={() => onClick(chocolate.id)}
     className="ivory-card group cursor-pointer hover:shadow-xl hover:-translate-y-1"
@@ -15,12 +21,20 @@ export const ChocolateCard: React.FC<CardProps> = ({ chocolate, onClick }) => (
     onKeyDown={e => e.key === 'Enter' && onClick(chocolate.id)}
     aria-label={`${chocolate.name} — ${chocolate.producer}`}
   >
-    <div className="aspect-[4/5] bg-surface-container overflow-hidden">
+    <div className="aspect-[4/5] bg-surface-container overflow-hidden relative">
+      <button
+        onClick={e => { e.stopPropagation(); toggleCompare(chocolate.id); }}
+        className={`absolute top-2 right-2 z-10 p-1.5 rounded-full shadow transition-all ${inCompare ? 'bg-secondary text-primary' : 'bg-white/80 text-stone-400 opacity-0 group-hover:opacity-100'}`}
+        aria-label="Confronta">
+        <GitCompare size={12} />
+      </button>
+      <div className={`absolute inset-0 bg-stone-100 transition-opacity duration-500 ${imgLoaded ? 'opacity-0' : 'animate-pulse'}`} />
       <img
         src={chocolate.imageUrl}
         alt={chocolate.name}
-        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        className={`w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 ${imgLoaded ? 'opacity-100' : 'opacity-0'}`}
         loading="lazy"
+        onLoad={() => setImgLoaded(true)}
       />
     </div>
     <div className="p-3">
@@ -52,4 +66,5 @@ export const ChocolateCard: React.FC<CardProps> = ({ chocolate, onClick }) => (
       </div>
     </div>
   </div>
-);
+  );
+};

@@ -1,8 +1,9 @@
 import React from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { User, LogOut, LogIn, UserPlus, Menu, X } from 'lucide-react';
+import { User, LogOut, LogIn, UserPlus, Menu, X, Search } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useAppSettings } from '../contexts/AppSettingsContext';
+import { useSearch } from '../contexts/SearchContext';
 import { supabase } from '../lib/supabase';
 
 const BASE_NAV_ITEMS = [
@@ -15,6 +16,7 @@ const BASE_NAV_ITEMS = [
 export const Header: React.FC = () => {
   const { user, profile, setShowAuthModal } = useAuth();
   const { tastingsEnabled } = useAppSettings();
+  const { openSearch } = useSearch();
   const location = useLocation();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = React.useState(false);
@@ -63,6 +65,9 @@ export const Header: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-4">
+          <button onClick={openSearch} className="p-2 text-stone-400 hover:text-stone-700 transition-colors" aria-label="Cerca">
+            <Search size={18} />
+          </button>
           {user ? (
             <>
               <Link to="/profile" className="flex items-center gap-2 group">

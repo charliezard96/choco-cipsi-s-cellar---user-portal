@@ -13,6 +13,11 @@ import { CommunityView } from './views/Community';
 import { UpdatePasswordView } from './views/UpdatePassword';
 import { AuthCallback } from './views/AuthCallback';
 import { AuthModal } from './components/AuthModal';
+import { GlobalSearchModal } from './components/GlobalSearchModal';
+import { CompareFloatingBar } from './components/CompareFloatingBar';
+import { CompareView } from './views/CompareView';
+import { SearchProvider } from './contexts/SearchContext';
+import { CompareProvider } from './contexts/CompareContext';
 import { supabase } from './lib/supabase';
 import { useChocolates } from './hooks/useChocolates';
 import { useProducers } from './hooks/useProducers';
@@ -37,6 +42,8 @@ export default function App() {
   }, [location.pathname]);
 
   return (
+    <SearchProvider>
+    <CompareProvider>
     <div className="min-h-screen bg-surface flex flex-col font-sans selection:bg-secondary-container selection:text-on-secondary-container">
       <Header />
 
@@ -65,6 +72,7 @@ export default function App() {
             <ProducerDetailView producers={producers} chocolates={chocolates} />
           } />
           <Route path="/tastings" element={<TastingsView />} />
+          <Route path="/compare" element={<CompareView chocolates={chocolates} />} />
           <Route path="/profile" element={
             <ProfileView chocolates={chocolates} />
           } />
@@ -84,7 +92,11 @@ export default function App() {
       </main>
 
       <AuthModal />
+      <GlobalSearchModal chocolates={chocolates} producers={producers} />
+      <CompareFloatingBar chocolates={chocolates} />
       <Footer />
     </div>
+    </CompareProvider>
+    </SearchProvider>
   );
 }

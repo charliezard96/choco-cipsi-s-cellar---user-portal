@@ -1,8 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Chocolate } from '../types';
 import { ChocolateCard } from '../components/ChocolateCard';
 import { Search, Loader2 } from 'lucide-react';
+
+const PAGE_SIZE = 24;
 
 interface Props {
   chocolates: Chocolate[];
@@ -15,6 +17,9 @@ export const EncyclopediaView: React.FC<Props> = ({ chocolates, loading }) => {
   const [selectedOrigin, setSelectedOrigin] = useState('All');
   const [selectedNote, setSelectedNote] = useState('All');
   const [selectedPercentage, setSelectedPercentage] = useState('All');
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => { setCurrentPage(1); }, [search, selectedOrigin, selectedNote, selectedPercentage]);
 
   const origins = useMemo(() => Array.from(new Set(chocolates.map(c => c.origin))).sort(), [chocolates]);
   const notes = useMemo(() => Array.from(new Set(chocolates.flatMap(c => c.tastingNotes))).sort(), [chocolates]);
@@ -33,6 +38,9 @@ export const EncyclopediaView: React.FC<Props> = ({ chocolates, loading }) => {
       return matchesSearch && matchesOrigin && matchesNote && matchesPct;
     });
   }, [chocolates, search, selectedOrigin, selectedNote, selectedPercentage]);
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paginated = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   const resetFilters = () => { setSearch(''); setSelectedOrigin('All'); setSelectedNote('All'); setSelectedPercentage('All'); };
 
@@ -91,19 +99,51 @@ export const EncyclopediaView: React.FC<Props> = ({ chocolates, loading }) => {
             </div>
           ))
         ) : (
-          filtered.map(choco => (
+          paginated.map(choco => (
             <ChocolateCard key={choco.id} chocolate={choco} onClick={(id) => navigate(`/chocolate/${id}`)} />
           ))
         )}
       </section>
 
       {!loading && (
-        <div className="flex flex-col items-center gap-4 py-12 border-t border-primary/10">
-          <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em]">
-            Visualizzazione di {filtered.length} voci dell'archivio
-          </p>
+  <div className="flex flex-col items-center gap-4 py-12 border-t border-primary/10">
+    <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em]">
+      {filtered.length} voci · pagina {currentPage} di {totalPages || 1}
+    </p>
+    {totalPages > 1 && (
+      <div className="flex items-center gap-2">
+        <button
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+          className="px-4 py-2 rounded-lg border border-primary/10 text-xs font-bold text-primary disabled:opacity-30 hover:bg-primary hover:text-white transition-all uppercase tracking-widest">
+          ← Precedente
+        </button>
+        <div className="flex gap-1">
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter(p => p === 1 || p === totalPages || Math.abs(p - currentPage) <= 1)
+            .reduce<(number | '...')[]>((acc, p, idx, arr) => {
+              if (idx > 0 && p - (arr[idx - 1] as number) > 1) acc.push('...');
+              acc.push(p);
+              return acc;
+            }, [])
+            .map((p, i) => p === '...'
+              ? <span key={`e${i}`} className="px-2 text-stone-300 text-xs">…</span>
+              : <button key={p} onClick={() => setCurrentPage(p as number)}
+                  className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${currentPage === p ? 'bg-primary text-white' : 'border border-primary/10 text-primary hover:bg-stone-100'}`}>
+                  {p}
+                </button>
+            )}
         </div>
-      )}
+        <button
+          disabled={currentPage === totalPages || totalPages === 0}
+          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+          className="px-4 py-2 rounded-lg border border-primary/10 text-xs font-bold text-primary disabled:opacity-30 hover:bg-primary hover:text-white transition-all uppercase tracking-widest">
+          Successivo →
+        </button>
+      </div>
+    )}
+  </div>
+)}
     </div>
   );
 };
