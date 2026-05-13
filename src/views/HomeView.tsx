@@ -67,7 +67,7 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
   /* ── LOGGED OUT ── */
   if (!user) {
     return (
-      <div className="animate-in fade-in duration-700 -mt-12 -mx-8">
+      <div className="animate-in fade-in duration-700">
         {/* Hero */}
         <section className="relative min-h-[85vh] flex items-center justify-center overflow-hidden">
           <img
@@ -108,7 +108,7 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
         </section>
 
         {/* Stats */}
-        <section className="bg-primary text-white py-16 px-8">
+        <section className="bg-primary text-white py-16 px-4 md:px-8">
           <div className="max-w-4xl mx-auto grid grid-cols-3 gap-8 text-center">
             {[
               { n: chocolates.length, label: 'Tavolette catalogate', icon: Fingerprint },
@@ -126,11 +126,11 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
 
         {/* Top rated preview */}
         {topBars.length > 0 && (
-          <section className="py-20 px-8 bg-surface">
+          <section className="py-20 px-4 md:px-8 bg-surface">
             <div className="max-w-5xl mx-auto">
               <p className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] mb-3 text-center">Community</p>
               <h2 className="text-3xl font-serif italic text-primary text-center mb-12">Le più celebrate</h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
                 {topBars.map(({ chocolate, avg, count }, i) => (
                   <div key={chocolate.id} className="group relative">
                     <div className="absolute -top-3 -left-2 z-10 w-7 h-7 bg-secondary text-primary font-black text-[10px] flex items-center justify-center rounded-full shadow-lg">
@@ -167,7 +167,7 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
   const firstName = profile?.name || profile?.username || 'Intenditore';
 
   return (
-    <div className="animate-in fade-in duration-700 max-w-5xl mx-auto">
+    <div className="animate-in fade-in duration-700 max-w-5xl mx-auto px-6 md:px-8 py-12">
       {/* Welcome */}
       <section className="mb-12">
         <span className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] block mb-2">Bentornato</span>
@@ -249,7 +249,7 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
               Vedi tutto →
             </button>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
             {topBars.map(({ chocolate, avg, count }, i) => (
               <button key={chocolate.id} onClick={() => navigate(`/chocolate/${chocolate.slug}`)}
                 className="group text-left relative">
