@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Verified, RefreshCw } from 'lucide-react';
+
 import { Chocolate, AromaProfile, BarLevelTag } from '../types';
 import { aromaService } from '../services/aromaService';
 import { getIconHelper } from '../utils/iconUtils';
@@ -92,7 +93,6 @@ export const CompareView: React.FC<Props> = ({ chocolates }) => {
     </div>
   );
 
-  const sharedNotes = a.tastingNotes.filter(n => b.tastingNotes.includes(n));
   const sharedFamilies = groupedA.map(g => g.groupName).filter(gn => groupedB.some(g => g.groupName === gn));
 
   const MetaRow: React.FC<{ label: string; va: string; vb: string }> = ({ label, va, vb }) => (
@@ -131,19 +131,6 @@ export const CompareView: React.FC<Props> = ({ chocolates }) => {
         <MetaRow label="% Cacao" va={a.percentage} vb={b.percentage} />
         <MetaRow label="Origine" va={a.origin} vb={b.origin} />
         <MetaRow label="Regione" va={a.region} vb={b.region} />
-        <div className="grid grid-cols-[1fr_auto_1fr] items-start gap-4 py-4">
-          <div className="flex flex-wrap gap-1 justify-end">
-            {a.tastingNotes.map(n => (
-              <span key={n} className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${sharedNotes.includes(n) ? 'bg-secondary/15 text-secondary' : 'bg-stone-100 text-stone-400'}`}>{n}</span>
-            ))}
-          </div>
-          <span className="w-28 text-center text-[9px] font-black text-stone-300 uppercase tracking-widest shrink-0">Note</span>
-          <div className="flex flex-wrap gap-1">
-            {b.tastingNotes.map(n => (
-              <span key={n} className={`text-[9px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest ${sharedNotes.includes(n) ? 'bg-secondary/15 text-secondary' : 'bg-stone-100 text-stone-400'}`}>{n}</span>
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Aroma profiles */}
@@ -161,20 +148,10 @@ export const CompareView: React.FC<Props> = ({ chocolates }) => {
       </div>
 
       {/* Shared callouts */}
-      {(sharedNotes.length > 0 || sharedFamilies.length > 0) && (
+      {sharedFamilies.length > 0 && (
         <div className="bg-secondary/5 border border-secondary/20 rounded-2xl p-6 flex items-start gap-4">
           <Verified size={18} className="text-secondary shrink-0 mt-0.5" />
           <div className="space-y-3">
-            {sharedNotes.length > 0 && (
-              <div>
-                <p className="text-xs font-black text-primary uppercase tracking-widest mb-2">Note in comune</p>
-                <div className="flex flex-wrap gap-2">
-                  {sharedNotes.map(n => (
-                    <span key={n} className="text-[10px] font-bold text-secondary bg-secondary/10 px-3 py-1 rounded-full uppercase tracking-widest">{n}</span>
-                  ))}
-                </div>
-              </div>
-            )}
             {sharedFamilies.length > 0 && (
               <div>
                 <p className="text-xs font-black text-primary uppercase tracking-widest mb-2">Famiglie aromatiche condivise</p>
@@ -200,3 +177,4 @@ export const CompareView: React.FC<Props> = ({ chocolates }) => {
     </div>
   );
 };
+
