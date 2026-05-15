@@ -58,6 +58,8 @@ export const OriginMap: React.FC<Props> = ({ origin, className = '' }) => {
       const path = d3.geoPath().projection(projection);
 
       let found = false;
+      const matchedFeatures: any[] = [];
+
       svg.selectAll('path')
         .data(geo.features)
         .enter()
@@ -65,11 +67,35 @@ export const OriginMap: React.FC<Props> = ({ origin, className = '' }) => {
         .attr('d', path as any)
         .attr('fill', (d: any) => {
           const match = matchesOrigin(d.properties?.name || '', origin);
-          if (match) found = true;
+          if (match) { found = true; matchedFeatures.push(d); }
           return match ? 'var(--color-secondary, #D4AF37)' : '#e7e5e4';
         })
         .attr('stroke', '#fafaf9')
         .attr('stroke-width', 0.4);
+
+      /* Circle marker on each matched country centroid */
+      matchedFeatures.forEach((feature: any) => {
+        const centroid = d3.geoCentroid(feature);
+        const projected = projection(centroid as [number, number]);
+        if (!projected) return;
+        const [cx, cy] = projected;
+
+        /* Outer ring */
+        svg.append('circle')
+          .attr('cx', cx).attr('cy', cy)
+          .attr('r', 14)
+          .attr('fill', 'none')
+          .attr('stroke', '#9e7248')
+          .attr('stroke-width', 1.8)
+          .attr('opacity', 0.45);
+
+        /* Inner dot */
+        svg.append('circle')
+          .attr('cx', cx).attr('cy', cy)
+          .attr('r', 5)
+          .attr('fill', '#9e7248')
+          .attr('opacity', 0.65);
+      });
 
       if (!found) setNotFound(true);
       setLoaded(true);
