@@ -80,21 +80,14 @@ export const OriginMap: React.FC<Props> = ({ origin, className = '' }) => {
         if (!projected) return;
         const [cx, cy] = projected;
 
-        /* Outer ring */
+        /* Outer ring — same hue as country fill */
         svg.append('circle')
           .attr('cx', cx).attr('cy', cy)
           .attr('r', 14)
           .attr('fill', 'none')
-          .attr('stroke', '#9e7248')
-          .attr('stroke-width', 1.8)
-          .attr('opacity', 0.45);
-
-        /* Inner dot */
-        svg.append('circle')
-          .attr('cx', cx).attr('cy', cy)
-          .attr('r', 5)
-          .attr('fill', '#9e7248')
-          .attr('opacity', 0.65);
+          .attr('stroke', '#D4AF37')
+          .attr('stroke-width', 2)
+          .attr('opacity', 0.6);
       });
 
       if (!found) setNotFound(true);
