@@ -37,7 +37,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
 
   const {
     aromaProfiles, officialNotes, barLevelTags, noteVotes,
-    userRating, avgRating, totalRatings,
+    userRating,
     refreshTrigger, handleRate, handleToggleVote,
   } = useChocolateDetail(chocolate?.id || id || '', user?.id);
 
@@ -164,10 +164,10 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
       {/* Mappa origine */}
       <OriginMap origin={chocolate.origin} className="mb-12 max-w-2xl mx-auto" />
 
-      {/* Profilo Aromatico d'Archivio — card per famiglia */}
+      {/* Profilo aromatico del produttore — card per famiglia */}
       <div className="py-12 border-b border-primary/10">
         <h3 className="text-[10px] font-bold text-on-surface-variant/50 tracking-widest uppercase mb-8 flex items-center gap-2">
-          <BookOpen size={14} className="text-secondary" /> Profilo Aromatico d'Archivio
+          <BookOpen size={14} className="text-secondary" /> Profilo aromatico del produttore
         </h3>
 
         {(groupedTags.length > 0 || officialNotes.length > 0) ? (
@@ -331,7 +331,7 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-20 items-stretch">
         <div className="flex flex-col gap-12">
           <div className="bg-stone-50 p-6 md:p-12 border border-primary/5 shadow-sm rounded-3xl">
-            <h3 className="text-xl font-bold text-primary mb-8 flex items-center gap-3"><BookOpen className="text-secondary" size={20} /> Descrizione Storica</h3>
+            <h3 className="text-xl font-bold text-primary mb-8 flex items-center gap-3"><BookOpen className="text-secondary" size={20} /> Descrizione</h3>
             <p className="text-xs text-on-surface-variant/90 leading-relaxed italic font-medium">{chocolate.description}</p>
           </div>
           <div className="bg-white p-6 md:p-12 border border-primary/10 shadow-sm rounded-3xl flex-1">
@@ -339,41 +339,37 @@ export const DetailView: React.FC<Props> = ({ chocolates, producers, loading }) 
           </div>
         </div>
         <div className="flex flex-col gap-12">
-          {/* Ratings */}
+          {/* Ratings — personali, visibili solo all'utente loggato */}
           <div className="bg-white p-6 md:p-12 border border-primary/10 shadow-sm rounded-3xl">
-            <div className="flex justify-between items-start mb-8">
-              <div>
-                <h3 className="text-xl font-bold text-primary mb-2">Feedback degli Intenditori</h3>
-                <p className="text-xs font-bold text-secondary uppercase tracking-widest">Valutazione Globale della Community</p>
-              </div>
-              {avgRating !== null && (
-                <div className="text-right">
-                  <div className="text-4xl font-bold text-primary">{avgRating.toFixed(1)}</div>
-                  <div className="text-[10px] font-bold text-on-surface-variant/40 uppercase">da {totalRatings} voti</div>
-                </div>
-              )}
+            <div className="mb-8">
+              <h3 className="text-xl font-bold text-primary mb-2">La Tua Valutazione</h3>
+              <p className="text-xs font-bold text-secondary uppercase tracking-widest">Voto Personale</p>
             </div>
-            <div className="mb-12">
-              <p className="text-sm text-on-surface-variant mb-6 font-medium">Come valuteresti questo raccolto specifico?</p>
-              <div className="flex gap-1 sm:gap-3 items-center">
-                {[1, 2, 3, 4, 5].map(star => (
-                  <button key={star} disabled={savingRating}
-                    onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
-                    onClick={() => onRate(star)}
-                    className={`transition-transform active:scale-90 ${savingRating ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                    <Star size={42} className={`transition-colors duration-200 ${(hoverRating || userRating || 0) >= star ? 'text-secondary fill-secondary' : 'text-surface-container-high'}`} />
-                  </button>
-                ))}
-                {savingRating && <RefreshCw size={24} className="animate-spin text-secondary ml-2" />}
+            {user ? (
+              <div className="mb-12">
+                <p className="text-sm text-on-surface-variant mb-6 font-medium">Come valuteresti questo raccolto specifico?</p>
+                <div className="flex gap-1 sm:gap-3 items-center">
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button key={star} disabled={savingRating}
+                      onMouseEnter={() => setHoverRating(star)} onMouseLeave={() => setHoverRating(0)}
+                      onClick={() => onRate(star)}
+                      className={`transition-transform active:scale-90 ${savingRating ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                      <Star size={42} className={`transition-colors duration-200 ${(hoverRating || userRating || 0) >= star ? 'text-secondary fill-secondary' : 'text-surface-container-high'}`} />
+                    </button>
+                  ))}
+                  {savingRating && <RefreshCw size={24} className="animate-spin text-secondary ml-2" />}
+                </div>
+                {userRating && <p className="mt-4 text-[10px] font-bold text-secondary uppercase tracking-widest">Hai valutato questa voce: {userRating} Stelle</p>}
               </div>
-              {userRating && <p className="mt-4 text-[10px] font-bold text-secondary uppercase tracking-widest">Hai valutato questa voce: {userRating} Stelle</p>}
-              {!user && (
+            ) : (
+              <div className="mb-12">
+                <p className="text-sm text-on-surface-variant mb-6 font-medium">Accedi per registrare la tua valutazione personale.</p>
                 <button onClick={() => setShowAuthModal(true, 'login')}
-                  className="mt-6 flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest hover:text-secondary transition-colors">
+                  className="flex items-center gap-2 text-[10px] font-bold text-primary uppercase tracking-widest hover:text-secondary transition-colors">
                   <LogIn size={14} /> Accedi per valutare
                 </button>
-              )}
-            </div>
+              </div>
+            )}
             <div className="pt-8 border-t border-primary/5">
               <div className="flex items-start gap-4">
                 <Verified className="text-secondary shrink-0" strokeWidth={2.5} />
