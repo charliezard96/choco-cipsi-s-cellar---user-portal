@@ -73,7 +73,7 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
           <div className="absolute inset-0 bg-gradient-to-b from-primary/70 via-primary/60 to-primary/80" />
 
           <div className="relative z-10 text-center px-6 max-w-3xl mx-auto">
-            <span className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] mb-6 block">
+            <span className="text-[10px] font-black text-secondary-container uppercase tracking-[0.4em] mb-6 block">
               L'Archivio del Cioccolato Fine
             </span>
             <h1 className="text-5xl md:text-7xl font-serif italic text-white leading-tight mb-6">
