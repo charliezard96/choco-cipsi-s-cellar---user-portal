@@ -20,7 +20,6 @@ interface UserStats {
 
 interface TopBar {
   chocolate: Chocolate;
-  avg: number;
   count: number;
 }
 
@@ -35,20 +34,16 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
   /* ── Fetch data ── */
   useEffect(() => {
     ratingService.fetchAllRatings().then(all => {
-      const stats: Record<string, { total: number; count: number }> = {};
-      all.forEach(r => {
-        if (!stats[r.chocolate_id]) stats[r.chocolate_id] = { total: 0, count: 0 };
-        stats[r.chocolate_id].total += r.rating;
-        stats[r.chocolate_id].count += 1;
-      });
-      const top = Object.entries(stats)
-        .map(([id, s]) => {
+      const counts: Record<string, number> = {};
+      all.forEach(r => { counts[r.chocolate_id] = (counts[r.chocolate_id] || 0) + 1; });
+      const top = Object.entries(counts)
+        .map(([id, count]) => {
           const choco = chocolates.find(c => c.id === String(id));
-          if (!choco || s.count < 1) return null;
-          return { chocolate: choco, avg: s.total / s.count, count: s.count };
+          if (!choco || count < 1) return null;
+          return { chocolate: choco, count };
         })
         .filter((x): x is TopBar => x !== null)
-        .sort((a, b) => b.avg - a.avg || b.count - a.count)
+        .sort((a, b) => b.count - a.count)
         .slice(0, 4);
       setTopBars(top);
     }).catch(console.error);
@@ -131,7 +126,7 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
               <p className="text-[10px] font-black text-secondary uppercase tracking-[0.4em] mb-3 text-center">Community</p>
               <h2 className="text-3xl font-serif italic text-primary text-center mb-12">Le più celebrate</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-                {topBars.map(({ chocolate, avg, count }, i) => (
+                {topBars.map(({ chocolate, count }, i) => (
                   <div key={chocolate.id} className="group relative">
                     <div className="absolute -top-3 -left-2 z-10 w-7 h-7 bg-secondary text-primary font-black text-[10px] flex items-center justify-center rounded-full shadow-lg">
                       #{i + 1}
@@ -141,11 +136,9 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
                     </div>
                     <span className="text-[9px] font-black text-secondary uppercase tracking-widest block">{chocolate.producer}</span>
                     <span className="text-sm font-bold text-primary leading-tight block">{chocolate.name}</span>
-                    <div className="flex items-center gap-1 mt-1">
-                      <Star size={11} className="fill-secondary text-secondary" />
-                      <span className="text-xs font-black text-primary">{avg.toFixed(1)}</span>
-                      <span className="text-[9px] text-stone-400">({count})</span>
-                    </div>
+                    <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-1 block">
+                      {count} {count === 1 ? 'valutazione' : 'valutazioni'}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -250,7 +243,7 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
             </button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
-            {topBars.map(({ chocolate, avg, count }, i) => (
+            {topBars.map(({ chocolate, count }, i) => (
               <button key={chocolate.id} onClick={() => navigate(`/chocolate/${chocolate.slug}`)}
                 className="group text-left relative">
                 <div className="absolute -top-3 -left-2 z-10 w-7 h-7 bg-secondary text-primary font-black text-[10px] flex items-center justify-center rounded-full shadow-lg">
@@ -262,11 +255,9 @@ export const HomeView: React.FC<Props> = ({ chocolates, producers }) => {
                 </div>
                 <span className="text-[9px] font-black text-secondary uppercase tracking-widest block">{chocolate.producer}</span>
                 <span className="text-sm font-bold text-primary leading-tight block">{chocolate.name}</span>
-                <div className="flex items-center gap-1 mt-1">
-                  <Star size={11} className="fill-secondary text-secondary" />
-                  <span className="text-xs font-black text-primary">{avg.toFixed(1)}</span>
-                  <span className="text-[9px] text-stone-400">({count})</span>
-                </div>
+                <span className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mt-1 block">
+                  {count} {count === 1 ? 'valutazione' : 'valutazioni'}
+                </span>
               </button>
             ))}
           </div>
