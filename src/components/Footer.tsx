@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAppSettings } from '../contexts/AppSettingsContext';
+import { PRIVACY_PATH } from '../config/legal';
 
 export const Footer: React.FC = () => {
   const year = new Date().getFullYear();
@@ -21,6 +22,10 @@ export const Footer: React.FC = () => {
           <p className="font-sans text-[10px] uppercase tracking-[0.2em] text-stone-800">
             © {year} DeCacao. Dedicata alla provenienza e alle note di degustazione.
           </p>
+          <Link to={PRIVACY_PATH}
+            className="font-sans text-[10px] uppercase tracking-[0.2em] text-stone-500 underline underline-offset-4 hover:text-secondary transition-colors">
+            Privacy e cookie
+          </Link>
         </div>
         <nav className="flex flex-wrap justify-center gap-8">
           {FOOTER_LINKS.map(link => (

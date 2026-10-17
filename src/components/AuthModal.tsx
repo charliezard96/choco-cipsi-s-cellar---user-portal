@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth, AuthMode } from '../contexts/AuthContext';
+import { PRIVACY_PATH } from '../config/legal';
 import { supabase } from '../lib/supabase';
 import { authService } from '../services/authService';
 import { useAuthSettings } from '../hooks/useAuthSettings';
@@ -196,6 +198,16 @@ export const AuthModal: React.FC = () => {
                 {mode === 'login' ? 'Registrati qui' : 'Accedi qui'}
               </button>
             </p>
+
+            {mode !== 'forgot-password' && (
+              <p className="mt-6 text-[11px] text-stone-500 leading-relaxed">
+                Registrandoti o accedendo dichiari di aver letto l'
+                <Link to={PRIVACY_PATH} onClick={() => setShowAuthModal(false)}
+                  className="underline underline-offset-2 hover:text-primary">
+                  informativa privacy
+                </Link>.
+              </p>
+            )}
           </div>
         </motion.div>
       </div>

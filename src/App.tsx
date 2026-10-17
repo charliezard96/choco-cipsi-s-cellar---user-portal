@@ -13,6 +13,8 @@ import { MyCellarView } from './views/MyCellarView';
 import { CommunityView } from './views/Community';
 import { UpdatePasswordView } from './views/UpdatePassword';
 import { AuthCallback } from './views/AuthCallback';
+import { PrivacyView } from './views/PrivacyView';
+import { PRIVACY_PATH } from './config/legal';
 import { AuthModal } from './components/AuthModal';
 import { GlobalSearchModal } from './components/GlobalSearchModal';
 import { CompareFloatingBar } from './components/CompareFloatingBar';
@@ -92,6 +94,7 @@ export default function App() {
             <UpdatePasswordView onComplete={() => navigate('/')} />
           } />
           <Route path="/auth-callback" element={<AuthCallback />} />
+          <Route path={PRIVACY_PATH} element={<PrivacyView />} />
           {/* Fallback: redirect to home */}
           <Route path="*" element={<HomeView chocolates={chocolates} producers={producers} />} />
         </Routes>

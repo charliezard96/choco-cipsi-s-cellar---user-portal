@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
-const GEO_URL = 'https://cdn.jsdelivr.net/gh/holtzy/D3-graph-gallery@master/DATA/world.geojson';
+/* Self-hosted (public/data) per non esporre l'IP dei visitatori a CDN terze.
+   Fonte: github.com/holtzy/D3-graph-gallery (MIT) */
+const GEO_URL = `${import.meta.env.BASE_URL}data/world.geojson`;
 const W = 600;
 const H = 300;
 
